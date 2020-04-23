@@ -1,36 +1,28 @@
-require(RMySQL)
-require(plyr)    
-require(stringi)
-require(RPostgreSQL)
-require(stringr)
-require(tidyr)
-require(stringdist)
-require(dplyr)  
-require(writexl)
 
-wd <- '~/farmac-sync/'      # ******** Configure para o dir onde deixou os ficheiros necessarios para executar o programa ****
+library(RPostgreSQL)
 
-## OpenMRS  - Configuracao de variaveis de conexao 
-openmrs.user ='esaude'                          # ******** modificar
-openmrs.password='esaude'                       # ******** modificar
-openmrs.db.name='albazine'                      # ******** modificar
-openmrs.host='127.17.0.2'                       # ******** modificar
-openmrs.port=3333                               # ******** modificar
-
-# Objecto de connexao com a bd openmrs
-con_openmrs = dbConnect(MySQL(), user=openmrs.user, password=openmrs.password, dbname=openmrs.db.name, host=openmrs.host, port=openmrs.port)
-
-
-postgres.user ='postgres'                      # ******** modificar
-postgres.password='postgres'                   # ******** modificar
-postgres.db.name='albazine'                    # ******** modificar
-postgres.host='127.17.0.3'                     # ******** modificar
-postgres.port=5432                             # ******** modifica
-
-con_postgres <-  dbConnect(PostgreSQL(),user = postgres.user,password = postgres.password, dbname = postgres.db.name,host = postgres.host)
-
-
-
+#' Estabelece uma conexao com o servidor central
+#' 
+#' @param postgres.user username do postgres
+#' @param postgres.password passwd
+#' @param postgres.db.name nome da db no postgres
+#' @param postgres.host IP do servidor provincial (mail.ccsaude.org.mz)
+#' @return con/0  (con) - retorna um conexao valida  (0) - erro de conexao   
+#' @examples 
+#' con_server <-getFarmacServerCon ('postgres',  'passwd', 'pharm','mail.ccsaude.org.mz','5432')
+#' 
+getFarmacServerCon <- function(postgres.user,postgres.password,postgres.db.name,postgres.host,postgres.port){
+  
+  con_postgres <-  dbConnect(PostgreSQL(),
+                             user = postgres.user,
+                             password = postgres.password,
+                             dbname = postgres.db.name,
+                             host = postgres.host)
+  
+  return(con_postgres)
+  
+  
+}
 
 
 
