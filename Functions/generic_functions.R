@@ -12,7 +12,7 @@
 getFarmacServerCon <- function(){
   
   # Carrega os parametros de conexao
-  source('config/config_farmac_server_properties.R')
+  source('config/config_properties.R')
   
   status <- tryCatch({
     
@@ -35,7 +35,7 @@ getFarmacServerCon <- function(){
   },
   error = function(cond) {
     
-    ## Coisas a fazer se occorre um erro 
+    ## Coisas a fazer se ocorrer um erro 
     
     # imprimir msg na consola
     
@@ -53,17 +53,6 @@ getFarmacServerCon <- function(){
   
     #Choose a return value in case of error
     return(FALSE)
-  },
-  warning = function(cond) {
-    message("Warning.... Here's the original warning message:")
-    # Choose a return value in case of warning
-    # guardar o log 
-    saveLogError(us.name = main_clinic_name,
-                 event.date = as.character(Sys.Date()),
-                 action = 'Warning... getFarmacServerCon -> Estabelece uma conexao com o servidor central - Farmac',
-                 error = as.character(cond$message) )  
-    
-    return(con_postgres)
   },
   finally = {
     # NOTE:
@@ -89,7 +78,7 @@ getLocalServerCon <- function(){
   
   
   # Carrega os parametros de conexao
-  source('config/config_local_server_properties.R')
+  source('config/config_properties.R')
   
   status <- tryCatch({
     
@@ -131,129 +120,15 @@ getLocalServerCon <- function(){
     #Choose a return value in case of error
     return(FALSE)
   },
-  warning = function(cond) {
-    message("Warning.... Here's the original warning message:")
-    # guardar o log 
-    saveLogError(us.name = main_clinic_name,
-                 event.date = as.character(Sys.Date()),
-                 action = 'Warning getLocalServerCon  ->  Estabelece uma conexao com o PostgreSQL Local',
-                 error =as.character(cond$message) )  
-    # Choose a return value in case of warning
-    return(con_postgres)
-  },
   finally = {
     # NOTE:
     # Here goes everything that should be executed at the end,
     # Do nothing
   })
   
- 
+  status
 }
 
-
-
-#' getFarmacSyncTempPatients -> Busca pacientes de uma det. US na tabela sync_temp_patient 
-#' no servidor FARMAC PosgreSQL 
-#' 
-#' @param con.postgres  obejcto de conexao com BD iDART
-#' @param main.clinic.name nome da us 
-#' @return tabela/dataframe/df com todos pacientes da tabela sync_temp_pacientes de determinada US
-#' @examples 
-#' main.clinic.name <- 'CS Albazine'
-#' con_farmac <- getFarmacServerCon()
-#' farmac_temp_sync_patients <- getFarmacSyncTempPatients(con_farmac,main.clinic.name)
-#' 
-
-getFarmacSyncTempPatients <- function(con.farmac, main.clinic.name) {
-  
-  
-  farmac_sync_temp_patients  <- dbGetQuery( con.farmac , paste0("select * from public.sync_temp_patients  where mainclinicname ='", main.clinic.name, "' ;" )  )
-  
-  return(farmac_sync_temp_patients)
-  
-}
-
-#' getLocalSyncTempPatients -> Busca pacientes de uma det. US  na tabela sync_temp_patient 
-#' no servidor Local PosgreSQL 
-#' 
-#' @param con.postgres  obejcto de conexao com BD iDART
-#' @param main.clinic.name nome da us 
-#' @return tabela/dataframe/df com todos pacientes da tabela sync_temp_pacientes de determinada US
-#' @examples 
-#' main.clinic.name <- 'CS Albazine'
-#' con_local <- getLocalServerCon()
-#' sync_patients_farmac <- getLocalSyncTempPatients(con_farmac,main.clinic.name)
-#' 
-
-getLocalSyncTempPatients <- function(con.local, main.clinic.name) {
-  
-  
-  sync_temp_patients  <- dbGetQuery( con.local , paste0("select * from public.sync_temp_patients  where mainclinicname ='", main.clinic.name, "' ;" )  )
-  
-  return(sync_temp_patients)
-  
-}
-
-
-
-#' refferPatients -> Envia pacientes referidos para o Servidor Farmac 
-#' 
-#' @param con.farmac  obejcto de conexao com BD
-#' @param reffered.patients o datafrane com os pacientes referidos (apenas os novos)  
-#' @return TRUE/FALSE
-#' @examples 
-#' 
-#' status <- refferPatients(con_farmac,pacientes_referidos)
-
-refferPatients<- function(con.farmac, reffered.patients) {
-  
-  # status (TRUE/FALSE)  envio com sucesso/ envio sem sucesso
-  status= 
-  return(status)
-  
-  status <- tryCatch({
-    
-    dbWriteTable(con_farmac, "sync_temp_patients", reffered.patients, row.names=FALSE, append=TRUE)
-    
-    return(TRUE)
-    
-  },
-  error = function(cond) {
-    
-    ## Coisas a fazer se occorre um erro 
-    # imprimir msg na consola
-    message(paste0( "PosgreSQL - Nao foi possivel actualizar os pacientes -se ao host: ",
-                    farmac.postgres.host, '  db:',farmac.postgres.db.name,
-                    "...",'user:',farmac.postgres.user,
-                    ' passwd: ', farmac.postgres.password)) 
-    message(cond)
-    
-    # guardar o log 
-    saveLogError(us.name = main_clinic_name,
-                 event.date = as.character(Sys.Date()),
-                 action = ' refferPatients -> Envia pacientes referidos para o Servidor Farmac',
-                 error = as.character(cond$message) )  
-    
-    #Choose a return value in case of error
-    return(FALSE)
-  },
-  warning = function(cond) {
-    message("Warning.... Here's the original warning message:")
-    # Choose a return value in case of warning
-    # guardar o log 
-    saveLogError(us.name = main_clinic_name,
-                 event.date = as.character(Sys.Date()),
-                 action = 'Warning refferPatients -> Envia pacientes referidos para o Servidor Farmac',
-                 error = as.character(cond$message) )  
-    return(TRUE)
-  },
-  finally = {
-    # NOTE:
-    # Here goes everything that should be executed at the end,
-    # Do nothing
-  })
-  
-}
 
 
 #' saveLogError -> guardar no log de erros  qualquer erro  que decorre durante a execucao
@@ -280,7 +155,6 @@ saveLogError <- function (us.name, event.date, action, error){
 }
 
 
-
 #' saveLogReferencia -> guardar informacao da referencia no log de pacientes referidos 
 #' 
 #' @param us.name nome US
@@ -302,3 +176,27 @@ saveLogReferencia<- function (us.name, event.date, patient, us.ref){
   logReferencia  <<-  add_row(logReferencia,unidade_sanitaria = us.name, data_evento =event.date, paciente =patient, referido_para= us.ref)
   
 }
+
+
+#' saveLogDispensa -> guardar informacao de dispensas  no log de dispensas  
+#' 
+#' @param us.name farnac_name
+#' @param data.evento data em que o erro acontece
+#' @param patient paciente 
+#' @param dispense.date  data do levantamento na farmac 
+#' @return NA
+#' @examples 
+#' 
+#' data <- Sys.Date()
+#' patient  <- '12/456 - Marta Joao'
+#' farmac.name  <- 'Farmac Jardim'
+#' dispense.date data  do levantamento
+#' saveLogDispensa(us_name,data,patient ,us_ref )
+#' 
+saveLogDispensa<- function (farmac.name, event.date, patient, dispense.date){
+  
+  # insere a linha de erro no das dispensas
+  log_dispensas  <<-  add_row(log_dispensas,unidade_sanitaria = farmac.name, data_evento =event.date, paciente =patient, data_levantamento= dispense.date)
+  
+}
+

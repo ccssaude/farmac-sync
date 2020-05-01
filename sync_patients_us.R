@@ -3,7 +3,9 @@ library(dplyr)
 library(plyr)
 
 # carrega funcoes
-source('generic_functions.R')
+source('Functions/generic_functions.R')
+source('Functions/patient_functions.R')
+
 
 # Load logs df
 load('logs/logErro.RData')
@@ -20,7 +22,7 @@ sync_patients_farmac <- getFarmacSyncTempPatients(con.farmac =  con_farmac,main.
 
 
 if(exists('sync_patients_local') && exists('sync_patients_farmac')){
-
+  
   ## filtrar apenas pacientes novos
   patients_to_send <- subset(sync_patients_local, !sync_patients_local$patientid %in% sync_patients_farmac$patientid ,) 
   if(dim(patients_to_send)[1] > 0){
@@ -30,19 +32,19 @@ if(exists('sync_patients_local') && exists('sync_patients_farmac')){
     
     if(status){
       
-     # escrever no log todos de referencia
+      # escrever no log todos de referencia
       for (i in 1:dim(patients_to_send)[1] ) {
         
-          us_name <- main_clinic_name
-          data <- as.character(Sys.Date())
-          patient   <-  gsub(pattern = 'NA',
-                             replacement = ' ',
-                             x =  paste0( patients_to_send$patientid[i],' ', patients_to_send$firstnames[i], ' ', patients_to_send$lastname[i] ) )
-          
-          us_ref  <- patients_to_send$clinicname[i]
-           
-          saveLogReferencia(us_name,data,patient ,us_ref)
-          
+        us_name <- main_clinic_name
+        data <- as.character(Sys.Date())
+        patient   <-  gsub(pattern = 'NA',
+                           replacement = ' ',
+                           x =  paste0( patients_to_send$patientid[i],' ', patients_to_send$firstnames[i], ' ', patients_to_send$lastname[i] ) )
+        
+        us_ref  <- patients_to_send$clinicname[i]
+        
+        saveLogReferencia(us_name,data,patient ,us_ref)
+        
         
       }
       
@@ -63,7 +65,7 @@ if(exists('sync_patients_local') && exists('sync_patients_farmac')){
     # nao ha pacientes novos
     message('Nao ha pacientes novos referidos')
   }
-
+  
   
   
 } else {
