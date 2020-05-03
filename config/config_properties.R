@@ -3,8 +3,8 @@
 ##  **  local (localhost)
 
 
-main_clinic_name <- 'CS Porto'
-farmac_name <- 'farmac jardim' #  somente para farmacs  
+main_clinic_name <- ''
+farmac_name <- 'farmac jardim' #  somente para farmacs / deixar em branco se nao for farmac 
 
 farmac.postgres.user ='farmac'                         # ******** modificar
 farmac.postgres.password='iD@rt2020'                   # ******** modificar

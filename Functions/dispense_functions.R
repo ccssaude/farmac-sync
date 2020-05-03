@@ -1,4 +1,4 @@
-#' getFarmacSyncTempDispense -> Busca Dispensas de uma det. US na tabela sync_temp_dispense
+#' getFarmacSyncTempDispense -> Busca Dispensas de uma det. FARMAC na tabela sync_temp_dispense
 #' no servidor FARMAC PosgreSQL 
 #' 
 #' @param con.farmac  obejcto de conexao com BD iDART
@@ -7,7 +7,7 @@
 #' @examples 
 #' farmac.name <- 'farmac jardim'
 #' con_farmac <- getFarmacServerCon()
-#' farmac_temp_sync_dispense<- getFarmacSyncTempDispense(con_farmac,farmac.name)
+#' farmac_temp_sync_dispense<- getFarmacSyncTempDispenseByName(con_farmac,farmac.name)
 #' 
 
 getFarmacSyncTempDispense <- function(con.farmac, farmac.name) {
@@ -30,11 +30,47 @@ getFarmacSyncTempDispense <- function(con.farmac, farmac.name) {
     
     # guardar o log 
     saveLogError(us.name = farmac_name,
-                 event.date = as.character(Sys.Date()),
-                 action = ' getFarmacSyncTempDispense -> Busca Dispensas de uma det. US na tabela sync_temp_dispense no servidor FARMAC PosgreSQL ',
-                 error =as.character(cond$message) )  
+                 event.date = as.character(Sys.time()),
+                 action = 'Warning  getFarmacSyncTempDispense -> Busca Dispensas de uma det. US na tabela sync_temp_dispense no servidor FARMAC PosgreSQL ',
+                 error = as.character(cond$message) )  
     
     #Choose a return value in case of error
+    return(FALSE)
+  },
+  warning = function(cond) {
+    
+    ## Coisas a fazer se ocorrer um erro 
+    
+    # imprimir msg na consola
+    message(cond$message)
+    
+    # guardar o log 
+    saveLogError(us.name = farmac_name,
+                 event.date = as.character(Sys.time()),
+                 action = 'Warning getUsSyncTempDispense -> Busca Dispensas de uma det. US na tabela sync_temp_dispense no servidor FARMAC PosgreSQL ',
+                 error = as.character(cond$message) )  
+    
+    
+    # Se for um waring em que nao foi possivel buscar os dados guardar no log e return FALSE
+    if(grepl(pattern = 'Could not create execute',x = cond$message,ignore.case = TRUE)){
+      
+      # guardar o log 
+      saveLogError(us.name = farmac_name,
+                   event.date = as.character(Sys.time()),
+                   action = 'Warning getUsSyncTempDispense -> Busca Dispensas de uma det. US na tabela sync_temp_dispense no servidor FARMAC PosgreSQL ',
+                   error = as.character(cond$message) )  
+      
+      return(FALSE)
+      
+    } else {
+      
+      if (exists('sync_temp_dispense')){
+        
+        return(sync_temp_dispense)
+      }
+      
+      
+    }
     return(FALSE)
   },
   finally = {
@@ -48,15 +84,101 @@ getFarmacSyncTempDispense <- function(con.farmac, farmac.name) {
   
 }
 
+#' getUsSyncTempDispense -> Busca Dispensas pertencentes a uma det. US na tabela sync_temp_dispense
+#' no servidor FARMAC PosgreSQL 
+#' 
+#' @param con.farmac  obejcto de conexao com BD iDART
+#' @param clinic.name nome da US que referiu os pacientes 
+#' @return tabela/dataframe/df com todas dispensas da tabela sync_temp_dispensas de determinada US
+#' @examples 
+#' clinic_name <- 'CS BAGAMOIO'
+#' con_farmac <- getFarmacServerCon()
+#' farmac_temp_sync_dispense<- getUsSyncTempDispense(con_farmac,clinic_name)
+#' 
 
-#' getLocalSyncTempDispense -> Busca Dispensas da US local na tabela sync_temp_dispense
+getUsSyncTempDispense <- function(con.farmac, clinic.name) {
+  
+  
+  sync_temp_dispense <- tryCatch({
+    
+    
+    temp_dispenses  <- dbGetQuery( con.farmac , paste0("select * from public.sync_temp_dispense where sync_temp_dispenseid = '" , clinic.name, "' ;" )  )
+    
+    return(temp_dispenses)
+    
+  },
+  error = function(cond) {
+    
+    ## Coisas a fazer se ocorrer um erro 
+    
+    # imprimir msg na consola
+    message(cond$message)
+    
+    # guardar o log 
+    saveLogError(us.name = clinic.name,
+                 event.date = as.character(Sys.time()),
+                 action = ' getUsSyncTempDispense -> Busca Dispensas de uma det. US na tabela sync_temp_dispense no servidor FARMAC PosgreSQL ',
+                 error = as.character(cond$message) )  
+    
+    #Choose a return value in case of error
+    return(FALSE)
+  },
+  warning = function(cond) {
+    
+    ## Coisas a fazer se ocorrer um erro 
+    
+    # imprimir msg na consola
+    message(cond$message)
+
+    # guardar o log 
+    saveLogError(us.name = clinic.name,
+                 event.date = as.character(Sys.time()),
+                 action = 'Warning getUsSyncTempDispense -> Busca Dispensas de uma det. US na tabela sync_temp_dispense no servidor FARMAC PosgreSQL ',
+                 error = as.character(cond$message) )  
+    
+
+    # Se for um waring em que nao foi possivel buscar os dados guardar no log e return FALSE
+     if(grepl(pattern = 'Could not create execute',x = cond$message,ignore.case = TRUE)){
+       
+       # guardar o log 
+       saveLogError(us.name = clinic.name,
+                    event.date = as.character(Sys.time()),
+                    action = 'Warning getUsSyncTempDispense -> Busca Dispensas de uma det. US na tabela sync_temp_dispense no servidor FARMAC PosgreSQL ',
+                    error = as.character(cond$message) )  
+       
+       return(FALSE)
+       
+     } else {
+       
+       if (exists('temp_dispenses')){
+         
+         return(temp_dispenses)
+       }
+       
+       
+     }
+    return(FALSE)
+  },
+  finally = {
+    # NOTE:
+    # Here goes everything that should be executed at the end,
+    # Do nothing
+  })
+  
+  sync_temp_dispense
+  
+  
+}
+
+#' getLocalSyncTempDispense -> Busca Dispensas no postgres local na tabela sync_temp_dispense
+#' esta tabela e usada para comparacao com os dados vindos do servidor da farmac para evitar duplicacoes
 #' 
 #' @param con.local  obejcto de conexao com BD iDART
 #' @return tabela/dataframe/df com todas dispensas da tabela sync_temp_dispensas  da US
 #' @examples 
 #' main.clinic.name <- 'CS Albazine'
 #' con_farmac <- getLocalServerCon()
-#' local_temp_sync_dispense<- getLocalSyncTempDispense(con_farmac,main.clinic.name)
+#' ua_temp_sync_dispense<- getLocalSyncTempDispense(con_farmac,main.clinic.name)
 #' 
 
 getLocalSyncTempDispense <- function(con.local) {
@@ -78,7 +200,7 @@ getLocalSyncTempDispense <- function(con.local) {
     
     # guardar o log 
     saveLogError(us.name = farmac_name,
-                 event.date = as.character(Sys.Date()),
+                 event.date = as.character(Sys.time()),
                  action = ' getLocalSyncTempDispense -> Busca Dispensas da US local na tabela sync_temp_dispense ',
                  error =as.character(cond$message) )  
     
@@ -98,24 +220,22 @@ getLocalSyncTempDispense <- function(con.local) {
 
 
 
-
-
 #' sendDispenseToServer -> Envia dispensas dos pacientes da farmac para o servidor Servidor Farmac 
 #' 
-#' @param con.farmac  obejcto de conexao com BD
+#' @param con_postgres  obejcto de conexao com BD
 #' @param df.dispenses o datafrane com as dispensas dos pacientes referidos (apenas as novas)  
 #' @return TRUE/FALSE
 #' @examples 
 #' 
 #' status <- sendDispenseToServer(con_farmac,pacientes_referidos)
+#TODO addicionar bloco de warnings no trycatch
 
-
-sendDispenseToServer <- function(con.farmac ,df.dispenses ){
+sendDispenseToServer <- function(con_postgres ,df.dispenses ){
   
   # status (TRUE/FALSE)  envio com sucesso/ envio sem sucesso
   status <- tryCatch({
     
-    dbWriteTable(con.farmac, "sync_temp_dispense", df.dispenses, row.names=FALSE, append=TRUE)
+    dbWriteTable(con_postgres, "logdispense", df.dispenses, row.names=FALSE, append=TRUE)
     
     ## se occorer algum erro , no envio esta parte nao vai executar
     status <- TRUE
@@ -128,10 +248,20 @@ sendDispenseToServer <- function(con.farmac ,df.dispenses ){
     message(cond$message)
     
     # guardar o log 
-    saveLogError(us.name = farmac_name,
-                 event.date = as.character(Sys.Date()),
-                 action = ' sendDispenseToServer ->  Envia dispensas dos pacientes da farmac para o servidor Servidor Farmac ',
-                 error = as.character(cond$message) )  
+    if(farmac_name==""){
+      saveLogError(us.name = main_clinic_name,
+                   event.date = as.character(Sys.time()),
+                   action = ' sendDispenseToServer ->  Erro ao actualizar as  dispensas dos pacientes da farmac para o servidor local ',
+                   error = as.character(cond$message) )  
+      
+    } else {
+      
+      saveLogError(us.name = farmac_name,
+                   event.date = as.character(Sys.time()),
+                   action = ' sendDispenseToServer ->  Erro ao enviar dispensas dos pacientes da farmac para o servidor Servidor Farmac ',
+                   error = as.character(cond$message) )  
+    }
+
     
     #Choose a return value in case of error
     return(FALSE)
@@ -144,4 +274,5 @@ sendDispenseToServer <- function(con.farmac ,df.dispenses ){
   
   return(status)
 }
+
 

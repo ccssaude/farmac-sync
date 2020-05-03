@@ -36,7 +36,7 @@ if(exists('sync_patients_local') && exists('sync_patients_farmac')){
       for (i in 1:dim(patients_to_send)[1] ) {
         
         us_name <- main_clinic_name
-        data <- as.character(Sys.Date())
+        data <- as.character(Sys.time())
         patient   <-  gsub(pattern = 'NA',
                            replacement = ' ',
                            x =  paste0( patients_to_send$patientid[i],' ', patients_to_send$firstnames[i], ' ', patients_to_send$lastname[i] ) )

@@ -1,3 +1,32 @@
+
+-- alteracao para todas US que fazem referencia de pacientes a farmacs
+alter  TABLE public.sync_temp_dispense add column  clinic_name_farmac character varying(255);
+ 
+-- Criacao da tabela dos logs
+create table public.logdispense(
+ id  SERIAL PRIMARY KEY,
+unidade_sanitaria  character varying(255) COLLATE pg_catalog."default",
+data_evento character  varying(255) COLLATE pg_catalog."default",
+paciente character varying(255) COLLATE pg_catalog."default",
+data_levantamento character varying(255) COLLATE pg_catalog."default"
+)
+TABLESPACE pg_default;
+
+
+-- Criacao da tabela dos logs
+create table public.logerro(
+ id  SERIAL PRIMARY KEY,
+us character varying(255) COLLATE pg_catalog."default",
+data_evento character varying(255) COLLATE pg_catalog."default",
+accao  character varying(255) COLLATE pg_catalog."default",
+erro character varying(255) COLLATE pg_catalog."default"
+)
+TABLESPACE pg_default;
+
+
+-- sync_temp_dispense do servidor farmac
+-- script de criacao da Table: public.sync_temp_dispense
+
 DROP TABLE IF EXISTS public.sync_temp_dispense CASCADE;
 CREATE TABLE public.sync_temp_dispense
 (
