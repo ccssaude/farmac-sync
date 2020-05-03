@@ -34,6 +34,7 @@ if(! is.logical(con_farmac) ){
       
       # Busca dispensas do servidor  farmac ( apenas da US) 
       sync_dispense_farmac <- getUsSyncTempDispense( con_farmac, main_clinic_name )
+      
       #sync_dispense_farmac <- getUsSyncTempDispense( con_farmac, "main_clinic_name" )
       if( ! is.logical(sync_dispense_farmac)){
   
@@ -65,7 +66,7 @@ if(! is.logical(con_farmac) ){
                                      replacement = ' ',
                                      x =  paste0( dispenses_to_get$patientid[i],' ', dispenses_to_get$patientfirstname[i], ' ', dispenses_to_get$patientlastname[i] ) )
                   
-                  data_levantamento  <- dispenses_to_get$dispensedate[i]
+                  data_levantamento  <- substr(dispenses_to_get$dispensedate[i],start = 1,stop = 10)
                   
                   saveLogDispensa(clinic_name = main_clinic_name,event.date = data,patient = patient,dispense.date = as.character(data_levantamento))
                   
@@ -86,7 +87,7 @@ if(! is.logical(con_farmac) ){
                     } else {
                       
                       log_dispenses_to_send <- log_dispensas
-                      status <- sendDispenseToServer(con_postgres = con_farmac,df.dispenses = log_dispenses_to_send)
+                      status <- sendLogDispense(con_postgres = con_farmac, df.logdispense =  log_dispenses_to_send)
                       
                       if(status){
                         # salvar o ficheiro dos logs das dispensas
@@ -114,7 +115,7 @@ if(! is.logical(con_farmac) ){
                       
                      log_dispenses_to_send <- anti_join(log_dispensas,log_farmac_dispenses,  by=c('paciente','data_levantamento'))
                      if(nrow(log_dispenses_to_send)>0 ){
-                       status <- sendDispenseToServer(con_postgres = con_farmac,df.dispenses = log_dispenses_to_send)
+                       status <- sendLogDispense(con_postgres = con_farmac,df.logdispense = log_dispenses_to_send)
                        
                        if(status){
                          # salvar o ficheiro dos logs das dispensas
@@ -164,7 +165,7 @@ if(! is.logical(con_farmac) ){
             }
             
           }
-          else{
+          else{ # primeiro envio
             
             # nao ha dispensas no servidor -> local buscar todas do servidor farmac
             dispenses_to_get <- sync_dispense_farmac
@@ -173,7 +174,7 @@ if(! is.logical(con_farmac) ){
             
             if(status){
               
-              # escrever no log todos dispensas recebidas
+              # escrever no log todos dispensas recebidas hahaha
               for (i in 1:dim(dispenses_to_get)[1] ) {
                 
                 data <- as.character(Sys.time())
@@ -181,7 +182,7 @@ if(! is.logical(con_farmac) ){
                                    replacement = ' ',
                                    x =  paste0( dispenses_to_get$patientid[i],' ', dispenses_to_get$patientfirstname[i], ' ', dispenses_to_get$patientlastname[i] ) )
                 
-                data_levantamento  <- dispenses_to_get$dispensedate[i]
+                data_levantamento  <- substr(dispenses_to_get$dispensedate[i],start = 1,stop = 10)
                 
                 saveLogDispensa(clinic_name = main_clinic_name,event.date = data,patient = patient,dispense.date = as.character(data_levantamento))
                 
@@ -201,7 +202,7 @@ if(! is.logical(con_farmac) ){
                   }
                   else {
                     log_dispenses_to_send <- log_dispensas
-                    status <- sendDispenseToServer(con_postgres = con_farmac,df.dispenses = log_dispenses_to_send)
+                    status <- sendLogDispense(con_postgres = con_farmac,df.logdispense =  log_dispenses_to_send)
                     
                     if(status){
                       # salvar o ficheiro dos logs das dispensas
@@ -227,7 +228,7 @@ if(! is.logical(con_farmac) ){
                   else{
                     
                     log_dispenses_to_send <- anti_join(log_dispensas,log_farmac_dispenses,  by=c('paciente','data_levantamento'))
-                    status <- sendDispenseToServer(con_postgres = con_farmac,df.dispenses = log_dispenses_to_send)
+                    status <- sendLogDispense(con_postgres = con_farmac,df.logdispense =  log_dispenses_to_send)
                     
                     if(status){
                       # salvar o ficheiro dos logs das dispensas

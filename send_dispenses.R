@@ -63,7 +63,7 @@ if(! is.logical(con_farmac) ){
                                       replacement = ' ',
                                       x =  paste0( dispenses_to_send$patientid[i],' ', dispenses_to_send$patientfirstname[i], ' ', dispenses_to_send$patientlastname[i] ) )
                    
-                   data_levantamento  <- dispenses_to_send$dispensedate[i]
+                   data_levantamento  <- substr(dispenses_to_send$dispensedate[i],start = 1,stop = 10)
                    
                    saveLogDispensa(clinic_name =  farmac_name,event.date = data,patient = patient,dispense.date = as.character(data_levantamento))
                    
@@ -187,7 +187,7 @@ if(! is.logical(con_farmac) ){
                                       replacement = ' ',
                                       x =  paste0( dispenses_to_send$patientid[i],' ', dispenses_to_send$patientfirstname[i], ' ', dispenses_to_send$patientlastname[i] ) )
                    
-                   data_levantamento  <- dispenses_to_send$dispensedate[i]
+                   data_levantamento  <- substr(dispenses_to_send$dispensedate[i],start = 1,stop = 10)
                    
                    saveLogDispensa(clinic_name =  farmac_name,event.date = data,patient = patient,dispense.date = as.character(data_levantamento))
                    
