@@ -28,6 +28,7 @@ TABLESPACE pg_default;
 -- script de criacao da Table: public.sync_temp_dispense
 
 DROP TABLE IF EXISTS public.sync_temp_dispense CASCADE;
+
 CREATE TABLE public.sync_temp_dispense
 (
   

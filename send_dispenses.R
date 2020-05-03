@@ -112,7 +112,7 @@ if(! is.logical(con_farmac) ){
                        
                        if(nrow(log_dispenses_to_send)>0){
                          
-                         status <- sendDispenseToServer(con_postgres = con_farmac,df.dispenses = log_dispenses_to_send)
+                         status <- sendLogDispense(con_postgres = con_farmac,df.logdispense =  log_dispenses_to_send)
                          
                          if(status){
                            # salvar o ficheiro dos logs das dispensas
@@ -127,7 +127,7 @@ if(! is.logical(con_farmac) ){
                          
                        } else{
                          
-                         message(paste0(farmac_name,' - Sem dispenas novas por enviar.'))
+                         message(paste0(farmac_name,' - Sem  logs de dispenas novas por enviar.'))
                          
                        }
                       
@@ -194,17 +194,75 @@ if(! is.logical(con_farmac) ){
                    
                  }
                  
-                 status_envio= sendLogDispense(con_postgres = con_farmac,df.logdispense =  log_dispensas)
-                 if(status_envio){
-
-                   # salvar o ficheiro dos logs dos pacientes referidos
-                   save(log_dispensas,file = 'logs/logDispensa.RData')
+                 log_farmac_dispenses <- getLogDispenseFromServer(con.farmac = con_farmac,
+                                                                  clinic.name = farmac_name)
+                 
+                 if(! is.logical(log_farmac_dispenses)){ 
                    
-                 } else{
+                   if(nrow(log_farmac_dispenses)==0){
+                     
+                     if(nrow(log_dispensas)==0){
+                       
+                       message(paste0(main_clinic_name,' - sem logs por enviar.'))
+                     }
+                     else {
+                       log_dispenses_to_send <- log_dispensas
+                       status <- sendLogDispense(con_postgres = con_farmac,df.logdispense =  log_dispenses_to_send)
+                       
+                       if(status){
+                         # salvar o ficheiro dos logs das dispensas
+                         save(log_dispensas,file = 'logs/logDispensa.RData')
+                         
+                       } else{
+                         # salvar o ficheiro logs das dispensas & dos erros
+                         save(log_dispensas,file = 'logs/logDispensa.RData')
+                         save(logErro, file = 'logs/logErro.RData')
+                         
+                       }
+                       
+                       
+                     }
+                     
+                   } 
+                   else {
+                     
+                     if(nrow(log_dispensas)==0){
+                       
+                       message(paste0(main_clinic_name,' - sem logs por enviar.'))
+                     } 
+                     else{
+                       
+                       log_dispenses_to_send <- anti_join(log_dispensas,log_farmac_dispenses,  by=c('paciente','data_levantamento'))
+                       if(nrow(log_dispenses_to_send)> 0){
+                         status <- sendLogDispense(con_postgres = con_farmac,df.logdispense =  log_dispenses_to_send)
+                         
+                         if(status){
+                           # salvar o ficheiro dos logs das dispensas
+                           save(log_dispensas,file = 'logs/logDispensa.RData')
+                           
+                         } else{
+                           # salvar o ficheiro logs das dispensas & dos erros
+                           save(log_dispensas,file = 'logs/logDispensa.RData')
+                           save(logErro, file = 'logs/logErro.RData')
+                           
+                         }
+                         
+                         
+                       } else { message(paste0(farmac_name, ' - Sem logs  novos por enviar'))}
+                       
+                       
+                     }
+                     
+                     
+                     
+                   }
                    
-                   ##  A exception sera capturada na funcao sendDispenseToServer
+                   
+                   
+                 } else {
+                   ##  A exception sera capturada na funcao getLogDispenseFromServer
                    save(logErro,file = 'logs/logErro.RData')
-                   
+                   save(log_dispensas,file = 'logs/logDispensa.RData')
                  }
                  
 

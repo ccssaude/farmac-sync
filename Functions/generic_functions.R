@@ -280,7 +280,7 @@ saveLogDispensa<- function (clinic_name, event.date, patient, dispense.date){
 #' @return TRUE/FALSE
 #' @examples 
 #' 
-#' status <- sendLogDispense(con_farmac,logReferencias)
+#' status <- sendLogDispense(con_farmac,logdispense)
 #TODO addicionar bloco de warnings no trycatch
 
 sendLogDispense <- function(con_postgres , df.logdispense ){
@@ -305,14 +305,14 @@ sendLogDispense <- function(con_postgres , df.logdispense ){
     if(farmac_name==""){
       saveLogError(us.name = main_clinic_name,
                    event.date = as.character(Sys.time()),
-                   action = 'sendLogDispense -> Envia log de dispensas para o servidor ',
+                   action = 'sendLogDispense -> Envia log de dispensas do servidor farmac para o servidor Local ',
                    error = as.character(cond$message) )  
       
     } else {
       
       saveLogError(us.name = farmac_name,
                    event.date = as.character(Sys.time()),
-                   action = 'sendLogDispense -> Envia log de dispensas para o servidor',
+                   action = 'sendLogDispense -> Envia log de dispensas da farmac para o servidor Farmac',
                    error = as.character(cond$message) )  
     }
     
@@ -334,14 +334,14 @@ sendLogDispense <- function(con_postgres , df.logdispense ){
       if(farmac_name==""){
         saveLogError(us.name = main_clinic_name,
                      event.date = as.character(Sys.time()),
-                     action = 'sendLogDispense -> Envia log de dispensas para o servidor ',
+                     action = 'sendLogDispense -> Envia log de dispensas do servidor FARMAC  para o servidor local ',
                      error = as.character(cond$message) )  
         
       } else {
         
         saveLogError(us.name = farmac_name,
                      event.date = as.character(Sys.time()),
-                     action = 'sendLogDispense -> Envia log de dispensas para o servidor',
+                     action = 'sendLogDispense -> Envia log de dispensas da farmac para o servidor Farmac',
                      error = as.character(cond$message) )  
       }
 

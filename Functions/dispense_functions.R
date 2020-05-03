@@ -31,7 +31,7 @@ getFarmacSyncTempDispense <- function(con.farmac, farmac.name) {
     # guardar o log 
     saveLogError(us.name = farmac_name,
                  event.date = as.character(Sys.time()),
-                 action = 'Warning  getFarmacSyncTempDispense -> Busca Dispensas de uma det. US na tabela sync_temp_dispense no servidor FARMAC PosgreSQL ',
+                 action = 'getFarmacSyncTempDispense -> Busca Dispensas de uma det. US na tabela sync_temp_dispense no servidor FARMAC PosgreSQL ',
                  error = as.character(cond$message) )  
     
     #Choose a return value in case of error
@@ -235,11 +235,11 @@ sendDispenseToServer <- function(con_postgres ,df.dispenses ){
   # status (TRUE/FALSE)  envio com sucesso/ envio sem sucesso
   status <- tryCatch({
     
-    dbWriteTable(con_postgres, "logdispense", df.dispenses, row.names=FALSE, append=TRUE)
+    status_send <- dbWriteTable(con_postgres, "sync_temp_dispense", df.dispenses, row.names=FALSE, append=TRUE)
     
     ## se occorer algum erro , no envio esta parte nao vai executar
-    status <- TRUE
-    
+    status_send <- TRUE
+    return(status_send)
   },
   error = function(cond) {
     
@@ -251,20 +251,65 @@ sendDispenseToServer <- function(con_postgres ,df.dispenses ){
     if(farmac_name==""){
       saveLogError(us.name = main_clinic_name,
                    event.date = as.character(Sys.time()),
-                   action = ' sendDispenseToServer ->  Erro ao actualizar as  dispensas dos pacientes da farmac para o servidor local ',
+                   action = ' sendDispenseToServer ->  Erro ao inserir as  dispensas dos pacientes da farmac para o servidor local ',
                    error = as.character(cond$message) )  
       
     } else {
       
       saveLogError(us.name = farmac_name,
                    event.date = as.character(Sys.time()),
-                   action = ' sendDispenseToServer ->  Erro ao enviar dispensas dos pacientes da farmac para o servidor Servidor Farmac ',
+                   action = ' sendDispenseToServer ->  Erro ao enviar dispensas dos pacientes da farmac para o  Servidor Farmac ',
                    error = as.character(cond$message) )  
     }
 
     
     #Choose a return value in case of error
     return(FALSE)
+  },
+  warning = function(cond) {
+    
+    ## Coisas a fazer se ocorrer um erro 
+    
+    # imprimir msg na consola
+    message(cond$message)
+    
+    
+    # Se for um waring em que nao foi possivel buscar os dados guardar no log e return FALSE
+    if(grepl(pattern = 'Could not create execute',x = cond$message,ignore.case = TRUE)){
+      
+      
+      # guardar o log 
+      if(farmac_name==""){
+        # guardar o log 
+        saveLogError(us.name = main_clinic_name,
+                     event.date = as.character(Sys.time()),
+                     action = 'Warning  sendDispenseToServer -> Envia dispensas dos pacientes da farmac para o  Servidor Local  ',
+                     error = as.character(cond$message) )  
+        
+      } else {
+        
+        # guardar o log 
+        saveLogError(us.name = farmac_name,
+                     event.date = as.character(Sys.time()),
+                     action = 'Warning  sendDispenseToServer -> Envia dispensas dos pacientes da farmac para o  Servidor Farmac  ',
+                     error = as.character(cond$message) )  
+      }
+
+      
+      return(FALSE)
+      
+    } else {
+      
+      if (exists('status_send')){
+        
+        return(status_send)
+      } else {
+        
+        return(FALSE)
+      }
+      
+      
+    }
   },
   finally = {
     # NOTE:
