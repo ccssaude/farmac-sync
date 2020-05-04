@@ -72,7 +72,11 @@ refferPatients <- function(con.farmac, reffered.patients) {
     
     # guardar o log 
     saveLogError(us.name = main_clinic_name,
+<<<<<<< HEAD
                  event.date = as.character(Sys.time()),
+=======
+                 event.date = as.character(Sys.Date()),
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
                  action = ' refferPatients -> Envia pacientes referidos para o Servidor Farmac',
                  error = as.character(cond$message) )  
     

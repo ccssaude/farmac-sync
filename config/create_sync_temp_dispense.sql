@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 -- alteracao para todas US que fazem referencia de pacientes a farmacs
 alter  TABLE public.sync_temp_dispense add column  clinic_name_farmac character varying(255);
@@ -29,6 +30,9 @@ TABLESPACE pg_default;
 
 DROP TABLE IF EXISTS public.sync_temp_dispense CASCADE;
 
+=======
+DROP TABLE IF EXISTS public.sync_temp_dispense CASCADE;
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
 CREATE TABLE public.sync_temp_dispense
 (
   

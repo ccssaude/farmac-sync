@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 #' getFarmacSyncTempDispense -> Busca Dispensas de uma det. FARMAC na tabela sync_temp_dispense
+=======
+#' getFarmacSyncTempDispense -> Busca Dispensas de uma det. US na tabela sync_temp_dispense
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
 #' no servidor FARMAC PosgreSQL 
 #' 
 #' @param con.farmac  obejcto de conexao com BD iDART
@@ -7,7 +11,11 @@
 #' @examples 
 #' farmac.name <- 'farmac jardim'
 #' con_farmac <- getFarmacServerCon()
+<<<<<<< HEAD
 #' farmac_temp_sync_dispense<- getFarmacSyncTempDispenseByName(con_farmac,farmac.name)
+=======
+#' farmac_temp_sync_dispense<- getFarmacSyncTempDispense(con_farmac,farmac.name)
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
 #' 
 
 getFarmacSyncTempDispense <- function(con.farmac, farmac.name) {
@@ -30,13 +38,20 @@ getFarmacSyncTempDispense <- function(con.farmac, farmac.name) {
     
     # guardar o log 
     saveLogError(us.name = farmac_name,
+<<<<<<< HEAD
                  event.date = as.character(Sys.time()),
                  action = 'getFarmacSyncTempDispense -> Busca Dispensas de uma det. US na tabela sync_temp_dispense no servidor FARMAC PosgreSQL ',
                  error = as.character(cond$message) )  
+=======
+                 event.date = as.character(Sys.Date()),
+                 action = ' getFarmacSyncTempDispense -> Busca Dispensas de uma det. US na tabela sync_temp_dispense no servidor FARMAC PosgreSQL ',
+                 error =as.character(cond$message) )  
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
     
     #Choose a return value in case of error
     return(FALSE)
   },
+<<<<<<< HEAD
   warning = function(cond) {
     
     ## Coisas a fazer se ocorrer um erro 
@@ -73,6 +88,8 @@ getFarmacSyncTempDispense <- function(con.farmac, farmac.name) {
     }
     return(FALSE)
   },
+=======
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
   finally = {
     # NOTE:
     # Here goes everything that should be executed at the end,
@@ -84,6 +101,7 @@ getFarmacSyncTempDispense <- function(con.farmac, farmac.name) {
   
 }
 
+<<<<<<< HEAD
 #' getUsSyncTempDispense -> Busca Dispensas pertencentes a uma det. US na tabela sync_temp_dispense
 #' no servidor FARMAC PosgreSQL 
 #' 
@@ -172,13 +190,21 @@ getUsSyncTempDispense <- function(con.farmac, clinic.name) {
 
 #' getLocalSyncTempDispense -> Busca Dispensas no postgres local na tabela sync_temp_dispense
 #' esta tabela e usada para comparacao com os dados vindos do servidor da farmac para evitar duplicacoes
+=======
+
+#' getLocalSyncTempDispense -> Busca Dispensas da US local na tabela sync_temp_dispense
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
 #' 
 #' @param con.local  obejcto de conexao com BD iDART
 #' @return tabela/dataframe/df com todas dispensas da tabela sync_temp_dispensas  da US
 #' @examples 
 #' main.clinic.name <- 'CS Albazine'
 #' con_farmac <- getLocalServerCon()
+<<<<<<< HEAD
 #' ua_temp_sync_dispense<- getLocalSyncTempDispense(con_farmac,main.clinic.name)
+=======
+#' local_temp_sync_dispense<- getLocalSyncTempDispense(con_farmac,main.clinic.name)
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
 #' 
 
 getLocalSyncTempDispense <- function(con.local) {
@@ -200,7 +226,11 @@ getLocalSyncTempDispense <- function(con.local) {
     
     # guardar o log 
     saveLogError(us.name = farmac_name,
+<<<<<<< HEAD
                  event.date = as.character(Sys.time()),
+=======
+                 event.date = as.character(Sys.Date()),
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
                  action = ' getLocalSyncTempDispense -> Busca Dispensas da US local na tabela sync_temp_dispense ',
                  error =as.character(cond$message) )  
     
@@ -220,26 +250,48 @@ getLocalSyncTempDispense <- function(con.local) {
 
 
 
+<<<<<<< HEAD
 #' sendDispenseToServer -> Envia dispensas dos pacientes da farmac para o servidor Servidor Farmac 
 #' 
 #' @param con_postgres  obejcto de conexao com BD
+=======
+
+
+#' sendDispenseToServer -> Envia dispensas dos pacientes da farmac para o servidor Servidor Farmac 
+#' 
+#' @param con.farmac  obejcto de conexao com BD
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
 #' @param df.dispenses o datafrane com as dispensas dos pacientes referidos (apenas as novas)  
 #' @return TRUE/FALSE
 #' @examples 
 #' 
 #' status <- sendDispenseToServer(con_farmac,pacientes_referidos)
+<<<<<<< HEAD
 #TODO addicionar bloco de warnings no trycatch
 
 sendDispenseToServer <- function(con_postgres ,df.dispenses ){
+=======
+
+
+sendDispenseToServer <- function(con.farmac ,df.dispenses ){
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
   
   # status (TRUE/FALSE)  envio com sucesso/ envio sem sucesso
   status <- tryCatch({
     
+<<<<<<< HEAD
     status_send <- dbWriteTable(con_postgres, "sync_temp_dispense", df.dispenses, row.names=FALSE, append=TRUE)
     
     ## se occorer algum erro , no envio esta parte nao vai executar
     status_send <- TRUE
     return(status_send)
+=======
+    dbWriteTable(con.farmac, "sync_temp_dispense", df.dispenses, row.names=FALSE, append=TRUE)
+    
+    ## se occorer algum erro , no envio esta parte nao vai executar
+    status <- TRUE
+    
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
   },
   error = function(cond) {
     
@@ -248,6 +300,7 @@ sendDispenseToServer <- function(con_postgres ,df.dispenses ){
     message(cond$message)
     
     # guardar o log 
+<<<<<<< HEAD
     if(farmac_name==""){
       saveLogError(us.name = main_clinic_name,
                    event.date = as.character(Sys.time()),
@@ -262,10 +315,17 @@ sendDispenseToServer <- function(con_postgres ,df.dispenses ){
                    error = as.character(cond$message) )  
     }
 
+=======
+    saveLogError(us.name = farmac_name,
+                 event.date = as.character(Sys.Date()),
+                 action = ' sendDispenseToServer ->  Envia dispensas dos pacientes da farmac para o servidor Servidor Farmac ',
+                 error = as.character(cond$message) )  
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
     
     #Choose a return value in case of error
     return(FALSE)
   },
+<<<<<<< HEAD
   warning = function(cond) {
     
     ## Coisas a fazer se ocorrer um erro 
@@ -311,6 +371,8 @@ sendDispenseToServer <- function(con_postgres ,df.dispenses ){
       
     }
   },
+=======
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
   finally = {
     # NOTE:
     # Here goes everything that should be executed at the end,
@@ -320,4 +382,7 @@ sendDispenseToServer <- function(con_postgres ,df.dispenses ){
   return(status)
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655

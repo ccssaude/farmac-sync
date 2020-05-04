@@ -11,7 +11,13 @@
 #' 
 getFarmacServerCon <- function(){
   
+<<<<<<< HEAD
 
+=======
+  # Carrega os parametros de conexao
+  source('config/config_properties.R')
+  
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
   status <- tryCatch({
     
     
@@ -44,6 +50,7 @@ getFarmacServerCon <- function(){
     message(cond)
     
     # guardar o log 
+<<<<<<< HEAD
     # se for um site de farmac entao no log guardamos o nome da FARMAC
     if(farmac_name != "" | nchar(farmac_name) > 0 ){
       saveLogError(us.name = farmac_name,
@@ -58,6 +65,12 @@ getFarmacServerCon <- function(){
                    error =as.character(cond$message) ) 
     }
  
+=======
+    saveLogError(us.name = main_clinic_name,
+                 event.date = as.character(Sys.Date()),
+                 action = ' getFarmacServerCon -> Estabelece uma conexao com o servidor central - Farmac',
+                 error =as.character(cond$message) )  
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
   
     #Choose a return value in case of error
     return(FALSE)
@@ -84,7 +97,14 @@ getFarmacServerCon <- function(){
 #' 
 getLocalServerCon <- function(){
   
+<<<<<<< HEAD
 
+=======
+  
+  # Carrega os parametros de conexao
+  source('config/config_properties.R')
+  
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
   status <- tryCatch({
     
     
@@ -118,6 +138,7 @@ getLocalServerCon <- function(){
     
     
     # guardar o log 
+<<<<<<< HEAD
     # se for um site de farmac entao no log guardamos o nome da FARMAC
     if(farmac_name != '' | nchar(farmac_name) > 0 ){
       saveLogError(us.name = farmac_name,
@@ -131,6 +152,12 @@ getLocalServerCon <- function(){
                    action = ' getLocalServerCon -> Estabelece uma conexao com o PostgreSQL Local',
                    error =as.character(cond$message) ) 
     }
+=======
+    saveLogError(us.name = main_clinic_name,
+                 event.date = as.character(Sys.Date()),
+                 action = ' getLocalServerCon  ->  Estabelece uma conexao com o PostgreSQL Local',
+                 error =as.character(cond$message) )  
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
     #Choose a return value in case of error
     return(FALSE)
   },
@@ -156,7 +183,11 @@ getLocalServerCon <- function(){
 #' @examples 
 #' 
 #' us_name <- 'CS Albazine'
+<<<<<<< HEAD
 #' data <- Sys.time()
+=======
+#' data <- Sys.Date()
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
 #' action  <- 'get Farmac Patients
 #' erro <- 'Can not connect to server + excption.msg '
 #' saveLogError(us_name,data,action ,erro )
@@ -169,6 +200,7 @@ saveLogError <- function (us.name, event.date, action, error){
 }
 
 
+<<<<<<< HEAD
 
 #' sendLogError -> Envia log de erros para o servidor
 #' 
@@ -226,6 +258,8 @@ sendLogError <- function(con_postgres , df.logerror ){
 }
 
 
+=======
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
 #' saveLogReferencia -> guardar informacao da referencia no log de pacientes referidos 
 #' 
 #' @param us.name nome US
@@ -236,7 +270,11 @@ sendLogError <- function(con_postgres , df.logerror ){
 #' @examples 
 #' 
 #' us_name <- 'CS Albazine'
+<<<<<<< HEAD
 #' data <- Sys.time()
+=======
+#' data <- Sys.Date()
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
 #' paticoen  <- '12/456 - Marta Joao'
 #' us_ref  <- 'Farmac Jardim'
 #' saveLogReferencia(us_name,data,patient ,us_ref )
@@ -251,13 +289,18 @@ saveLogReferencia<- function (us.name, event.date, patient, us.ref){
 
 #' saveLogDispensa -> guardar informacao de dispensas  no log de dispensas  
 #' 
+<<<<<<< HEAD
 #' @param clinic_name nome da us (farmac/us)
+=======
+#' @param us.name farnac_name
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
 #' @param data.evento data em que o erro acontece
 #' @param patient paciente 
 #' @param dispense.date  data do levantamento na farmac 
 #' @return NA
 #' @examples 
 #' 
+<<<<<<< HEAD
 #' data <- Sys.time()
 #' patient  <- '12/456 - Marta Joao'
 #' farmac.name  <- 'Farmac Jardim'
@@ -547,6 +590,18 @@ getLogErrorFromServer <- function(con.farmac, clinic.name) {
   
   log_dispenses
   
+=======
+#' data <- Sys.Date()
+#' patient  <- '12/456 - Marta Joao'
+#' farmac.name  <- 'Farmac Jardim'
+#' dispense.date data  do levantamento
+#' saveLogDispensa(us_name,data,patient ,us_ref )
+#' 
+saveLogDispensa<- function (farmac.name, event.date, patient, dispense.date){
+  
+  # insere a linha de erro no das dispensas
+  log_dispensas  <<-  add_row(log_dispensas,unidade_sanitaria = farmac.name, data_evento =event.date, paciente =patient, data_levantamento= dispense.date)
+>>>>>>> 37dacef36293b99aeca8fadfdee70bd92f062655
   
 }
 
