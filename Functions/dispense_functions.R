@@ -1,3 +1,6 @@
+library(dplyr)
+library(plyr)
+
 #' getFarmacSyncTempDispense -> Busca Dispensas de uma det. FARMAC na tabela sync_temp_dispense
 #' no servidor FARMAC PosgreSQL 
 #' 
@@ -248,7 +251,7 @@ sendDispenseToServer <- function(con_postgres ,df.dispenses ){
     message(cond$message)
     
     # guardar o log 
-    if(farmac_name==""){
+    if(is.farmac){
       saveLogError(us.name = main_clinic_name,
                    event.date = as.character(Sys.time()),
                    action = ' sendDispenseToServer ->  Erro ao inserir as  dispensas dos pacientes da farmac para o servidor local ',
@@ -279,7 +282,7 @@ sendDispenseToServer <- function(con_postgres ,df.dispenses ){
       
       
       # guardar o log 
-      if(farmac_name==""){
+      if(is.farmac){
         # guardar o log 
         saveLogError(us.name = main_clinic_name,
                      event.date = as.character(Sys.time()),

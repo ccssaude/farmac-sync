@@ -45,7 +45,7 @@ getFarmacServerCon <- function(){
     
     # guardar o log 
     # se for um site de farmac entao no log guardamos o nome da FARMAC
-    if(farmac_name != "" | nchar(farmac_name) > 0 ){
+    if(is.farmac){
       saveLogError(us.name = farmac_name,
                    event.date = as.character(Sys.time()),
                    action = ' getFarmacServerCon -> Estabelece uma conexao com o servidor central - Farmac',
@@ -89,7 +89,7 @@ getLocalServerCon <- function(){
     
     
     # imprimme uma msg na consola
-    message(paste0( "Postgres - conectando-se ao servidor FARMAC : ",
+    message(paste0( "Postgres - conectando-se ao servidor Local : ",
                     local.postgres.host, ' - db:',local.postgres.db.name, "...") )
     
     
@@ -119,7 +119,7 @@ getLocalServerCon <- function(){
     
     # guardar o log 
     # se for um site de farmac entao no log guardamos o nome da FARMAC
-    if(farmac_name != '' | nchar(farmac_name) > 0 ){
+    if(is.farmac ){
       saveLogError(us.name = farmac_name,
                    event.date = as.character(Sys.time()),
                    action = ' getLocalServerCon -> Estabelece uma conexao com o PostgreSQL Local',
@@ -198,7 +198,7 @@ sendLogError <- function(con_postgres , df.logerror ){
     message(cond$message)
     
     # guardar o log 
-    if(farmac_name==""){
+    if(is.farmac){
       saveLogError(us.name = main_clinic_name,
                    event.date = as.character(Sys.time()),
                    action = ' sendLogError -> Envia log de erros para o servidor ',
@@ -302,7 +302,7 @@ sendLogDispense <- function(con_postgres , df.logdispense ){
     message(cond$message)
     
     # guardar o log 
-    if(farmac_name==""){
+    if(is.farmac){
       saveLogError(us.name = main_clinic_name,
                    event.date = as.character(Sys.time()),
                    action = 'sendLogDispense -> Envia log de dispensas do servidor farmac para o servidor Local ',
@@ -331,7 +331,7 @@ sendLogDispense <- function(con_postgres , df.logdispense ){
     if(grepl(pattern = 'Could not create execute',x = cond$message,ignore.case = TRUE)){
       
       # guardar o log 
-      if(farmac_name==""){
+      if(fis.farmac){
         saveLogError(us.name = main_clinic_name,
                      event.date = as.character(Sys.time()),
                      action = 'sendLogDispense -> Envia log de dispensas do servidor FARMAC  para o servidor local ',
@@ -549,4 +549,30 @@ getLogErrorFromServer <- function(con.farmac, clinic.name) {
   
   
 }
+
+
+
+
+
+
+
+#' getMainClinicName -> Busca o nome da US na tabela clinic
+#'
+#' 
+#' @param con.local  obejcto de conexao com BD iDART
+#' @return nome da us
+#' @examples 
+#' main_clinic_name<- getMainClinicName(con_local)
+#' 
+
+getMainClinicName <- function(con.local) {
+  
+  
+  clinic_name   <- dbGetQuery( con.local ,"select clinicname from public.clinic where mainclinic = TRUE ; " )
+    
+    return(clinic_name$clinicname[1])
+ 
+  
+}
+
 

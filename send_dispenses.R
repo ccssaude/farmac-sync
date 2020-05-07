@@ -1,25 +1,16 @@
-library(RPostgreSQL)
-library(dplyr)
-library(plyr)
 
-# carrega funcoes
-source('Functions/generic_functions.R')
-source('config/config_properties.R')
-source('Functions/dispense_functions.R')
+# Limpar o envinronment & inicializar as 
 
-# Load logs df
-load('logs/logErro.RData')
-load('logs/logDispensa.RData') 
+rm(list=setdiff(ls(), c("wd", "is.farmac") ))
+
+source('config/config_properties.R')     
 
 
-# Get farmac  connections
-con_farmac <- getFarmacServerCon()
+#####################################################################################################
+
 
 # con_farmac = FALSE para casos de conexao nao estabelecida
 if(! is.logical(con_farmac) ){
-  
-  # Get local  connections
-  con_local <- getLocalServerCon()
   
   # con_local = FALSE para casos de conexao nao estabelecida
   if( ! is.logical(con_local) ) {
@@ -43,7 +34,8 @@ if(! is.logical(con_farmac) ){
            
            ## filtrar apenas novas dispensas 
            if(nrow(sync_dispense_local)> 0 ){
-             # busca actualiza todas da farmac
+             # remover a coluna imported ( nao precisamos dela neste script)
+             sync_dispense_farmac <- sync_dispense_farmac[ , -which( names(sync_dispense_farmac) %in% c("imported"))]
              dispenses_to_send <- anti_join(sync_dispense_local ,sync_dispense_farmac , by=c("id") )
              
              if(nrow(dispenses_to_send) > 0){

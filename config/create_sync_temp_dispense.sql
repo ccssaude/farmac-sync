@@ -1,8 +1,10 @@
 
 -- alteracao para todas US que fazem referencia de pacientes a farmacs
 alter  TABLE public.sync_temp_dispense add column  clinic_name_farmac character varying(255);
- 
+alter  TABLE public.sync_temp_dispense add column imported   character varying(255) default null;
+
 -- Criacao da tabela dos logs
+DROP TABLE IF EXISTS public.logdispense;
 create table public.logdispense(
  id  SERIAL PRIMARY KEY,
 unidade_sanitaria  character varying(255) COLLATE pg_catalog."default",
@@ -12,8 +14,14 @@ data_levantamento character varying(255) COLLATE pg_catalog."default"
 )
 TABLESPACE pg_default;
 
+-- Alteracoes FARMAC SERVER
 
--- Criacao da tabela dos logs
+alter  TABLE public.sync_temp_patients add column imported   character varying(255) default null;
+
+alter  TABLE public.sync_temp_dispense add column imported   character varying(255) default null;
+ 
+-- Criacao da tabela dos logs No Servidor FARMAC
+DROP TABLE IF EXISTS public.logerro;
 create table public.logerro(
  id  SERIAL PRIMARY KEY,
 us character varying(255) COLLATE pg_catalog."default",
@@ -77,7 +85,8 @@ CREATE TABLE public.sync_temp_dispense
     qtyinhand character varying(255) COLLATE pg_catalog."default",
     summaryqtyinhand character varying(255) COLLATE pg_catalog."default",
     qtyinlastbatch character varying(255) COLLATE pg_catalog."default",
-  	clinic_name_farmac character varying(255) COLLATE pg_catalog."default"
+  	clinic_name_farmac character varying(255) COLLATE pg_catalog."default",
+  	imported character varying(255) COLLATE pg_catalog."default"  default null
 )
 WITH (
     OIDS = FALSE
