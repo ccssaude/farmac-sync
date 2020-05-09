@@ -47,13 +47,7 @@ getFarmacSyncTempDispense <- function(con.farmac, farmac.name) {
     # imprimir msg na consola
     message(cond$message)
     
-    # guardar o log 
-    saveLogError(us.name = farmac_name,
-                 event.date = as.character(Sys.time()),
-                 action = 'Warning getUsSyncTempDispense -> Busca Dispensas de uma det. US na tabela sync_temp_dispense no servidor FARMAC PosgreSQL ',
-                 error = as.character(cond$message) )  
-    
-    
+
     # Se for um waring em que nao foi possivel buscar os dados guardar no log e return FALSE
     if(grepl(pattern = 'Could not create execute',x = cond$message,ignore.case = TRUE)){
       
@@ -133,12 +127,6 @@ getUsSyncTempDispense <- function(con.farmac, clinic.name) {
     # imprimir msg na consola
     message(cond$message)
 
-    # guardar o log 
-    saveLogError(us.name = clinic.name,
-                 event.date = as.character(Sys.time()),
-                 action = 'Warning getUsSyncTempDispense -> Busca Dispensas de uma det. US na tabela sync_temp_dispense no servidor FARMAC PosgreSQL ',
-                 error = as.character(cond$message) )  
-    
 
     # Se for um waring em que nao foi possivel buscar os dados guardar no log e return FALSE
      if(grepl(pattern = 'Could not create execute',x = cond$message,ignore.case = TRUE)){
@@ -323,4 +311,265 @@ sendDispenseToServer <- function(con_postgres ,df.dispenses ){
   return(status)
 }
 
+
+
+#' getDispensesToSendOpenMRS -> Busca Dispensas na tabela sync_temp_dispense para  actualizar em prescription , packagedrugs, package e OpenMRS
+#' no servidor Local
+#' 
+#' @param con.postgres   obejcto de conexao com BD iDART
+#' @return tabela/dataframe/df com todas dispensas da tabela sync_temp_dispensas que ainda nao forma enviadas para openmrs
+#' @examples 
+#' con_local <- getFarmacServerCon()
+#' dispensesToSend <- getFarmacSyncTempDispenseByName(con_farmac,farmac.name)
+#' 
+
+getDispensesToSendOpenMRS <- function(con.local) {
+  
+  
+  sync_temp_dispense <- tryCatch({
+    
+    
+    sync_temp_dispense  <- dbGetQuery( con.local , paste0( "select * from public.sync_temp_dispense where ( imported is null or imported ='' ) and sync_temp_dispenseid ='",main_clinic_name , "' ; ")   )
+    return(sync_temp_dispense)
+    
+  },
+  error = function(cond) {
+    
+    ## Coisas a fazer se ocorrer um erro 
+    
+    # imprimir msg na consola
+    message(cond$message)
+    
+    # guardar o log 
+    saveLogError(us.name = main_clinic_name,
+                 event.date = as.character(Sys.time()),
+                 action = 'getDispensesToSendOpenMRS -> Busca Dispensas na tabela sync_temp_dispense para  actualizar em prescription , packagedrugs, package e OpenMRS ',
+                 error = as.character(cond$message) )  
+    
+    #Choose a return value in case of error
+    return(FALSE)
+  },
+  warning = function(cond) {
+    
+    ## Coisas a fazer se ocorrer um erro 
+    
+    # imprimir msg na consola
+    message(cond$message)
+    
+
+    # Se for um waring em que nao foi possivel buscar os dados guardar no log e return FALSE
+    if(grepl(pattern = 'Could not create execute',x = cond$message,ignore.case = TRUE)){
+      
+      # guardar o log 
+      saveLogError(us.name = main_clinic_name,
+                   event.date = as.character(Sys.time()),
+                   action = 'warning getDispensesToSendOpenMRS -> Busca Dispensas na tabela sync_temp_dispense para  actualizar em prescription , packagedrugs, package e OpenMRS ',
+                   error = as.character(cond$message) )  
+      
+      return(FALSE)
+      
+    } else {
+      
+      if (exists('sync_temp_dispense')){
+        
+        return(sync_temp_dispense)
+      }
+      
+      
+    }
+    return(FALSE)
+  },
+  finally = {
+    # NOTE:
+    # Here goes everything that should be executed at the end,
+    # Do nothing
+  })
+  
+  sync_temp_dispense
+  
+  
+}
+
+
+#' saveNewPrescription  -> salva uma nova  prescricao na BD
+#' 
+#' @param con_postgres  obejcto de conexao com BD
+#' @param df.prescription o datafrane com a prescricao nova
+#' @examples 
+#' 
+#' status <- saveNewPrescription(con_local,prescription)
+#TODO addicionar bloco de warnings no trycatch
+
+saveNewPrescription <- function(con_postgres ,df.prescription ){
+  
+  # status (TRUE/FALSE)  envio com sucesso/ envio sem sucesso
+  status <- tryCatch({
+    
+    status_send <- dbWriteTable(con_postgres, "public.prescription", df.prescription, row.names=FALSE, append=TRUE)
+    
+    ## se occorer algum erro , no envio esta parte nao vai executar
+    status_send <- TRUE
+    return(status_send)
+  },
+  error = function(cond) {
+    
+    ## Coisas a fazer se occorre um erro 
+    # imprimir msg na consola
+    message(cond$message)
+    
+    # guardar o log 
+    if(is.farmac){
+      saveLogError(us.name = main_clinic_name,
+                   event.date = as.character(Sys.time()),
+                   action = 'saveNewPrescription  -> salva uma nova  prescricao na BD ',
+                   error = as.character(cond$message) )  
+      
+    } else {
+      
+      saveLogError(us.name = farmac_name,
+                   event.date = as.character(Sys.time()),
+                   action = ' saveNewPrescription  -> salva uma nova  prescricao na BD',
+                   error = as.character(cond$message) )  
+    }
+    
+    
+    #Choose a return value in case of error
+    return(FALSE)
+  },
+  warning = function(cond) {
+    
+    ## Coisas a fazer se ocorrer um erro 
+    
+    # imprimir msg na consola
+    message(cond$message)
+    
+    
+    # Se for um waring em que nao foi possivel buscar os dados guardar no log e return FALSE
+    if(grepl(pattern = 'Could not create execute',x = cond$message,ignore.case = TRUE)){
+      
+      
+      # guardar o log 
+      if(is.farmac){
+        # guardar o log 
+        saveLogError(us.name = main_clinic_name,
+                     event.date = as.character(Sys.time()),
+                     action = 'Warning saveNewPrescription  -> salva uma nova  prescricao na BD',
+                     error = as.character(cond$message) )  
+        
+      } else {
+        
+        # guardar o log 
+        saveLogError(us.name = farmac_name,
+                     event.date = as.character(Sys.time()),
+                     action = 'Warning  saveNewPrescription  -> salva uma nova  prescricao na BD  ',
+                     error = as.character(cond$message) )  
+      }
+      
+      
+      return(FALSE)
+      
+    } else {
+      
+      if (exists('status_send')){
+        
+        return(status_send)
+      } else {
+        
+        return(FALSE)
+      }
+      
+      
+    }
+  },
+  finally = {
+    # NOTE:
+    # Here goes everything that should be executed at the end,
+    # Do nothing
+  })
+  
+  return(status)
+}
+
+#' getPrescriptionFromPatient -> Busca a prescricao de  paciente
+#' 
+#' @param con.local   obejcto de conexao com BD iDART
+#' @param con.local   data do levantamento
+#' @return prescription df 
+#' @examples 
+#' con_local <- getFarmacServerCon()
+#' prescriptipn <- getPrescriptionFromPatient(con_farmac,nid)
+#' 
+
+getPrescriptionFromPatient <- function(con.local, date.pickup,patient.id) {
+  
+  
+  prescription <- tryCatch({
+    
+    
+    tmp_prescription  <- dbGetQuery( con.local ,
+                                     paste0(  "select * from prescription   where prescription.date = '", date.pickup, "' AND patient = ", as.numeric(patient.id)  ) )
+    
+    if(nrow(tmp_prescription)>1){ #  se tiver mais de uma prescricao na mesma data consdererar a ultima
+      tmp_prescription <- tmp_prescription[nrow(tmp_prescription),]
+    }
+    
+    return(tmp_prescription)
+    
+  },
+  error = function(cond) {
+    
+    ## Coisas a fazer se ocorrer um erro 
+    
+    # imprimir msg na consola
+    message(cond$message)
+    
+    # guardar o log 
+    saveLogError(us.name = main_clinic_name,
+                 event.date = as.character(Sys.time()),
+                 action = ' getPrescriptionFromPatient -> Busca a prescricao de  paciente ',
+                 error = as.character(cond$message) )  
+    
+    #Choose a return value in case of error
+    return(FALSE)
+  },
+  warning = function(cond) {
+    
+    ## Coisas a fazer se ocorrer um erro 
+    
+    # imprimir msg na consola
+    message(cond$message)
+    
+    
+    # Se for um waring em que nao foi possivel buscar os dados guardar no log e return FALSE
+    if(grepl(pattern = 'Could not create execute',x = cond$message,ignore.case = TRUE)){
+      
+      # guardar o log 
+      saveLogError(us.name = main_clinic_name,
+                   event.date = as.character(Sys.time()),
+                   action = 'warning  getPrescriptionFromPatient -> Busca a prescricao de  paciente',
+                   error = as.character(cond$message) )  
+      
+      return(FALSE)
+      
+    } else {
+      
+      if (exists('tmp_prescription')){
+        
+        return(tmp_prescription)
+      }
+      
+      
+    }
+    return(FALSE)
+  },
+  finally = {
+    # NOTE:
+    # Here goes everything that should be executed at the end,
+    # Do nothing
+  })
+  
+  prescription
+  
+  
+}
 

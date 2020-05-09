@@ -1,25 +1,18 @@
-library(RPostgreSQL)
-library(dplyr)
-library(plyr)
 
-# carrega funcoes
-source('Functions/generic_functions.R')
-source('config/config_properties.R')
-source('Functions/dispense_functions.R')
+# Limpar o envinronment & inicializar as 
 
-# Load logs df
-load('logs/logErro.RData')
-load('logs/logDispensa.RData') 
+rm(list=setdiff(ls(), c("wd", "is.farmac") ))
+
+source('config/config_properties.R')     
 
 
-# Get farmac  connections
-con_farmac <- getFarmacServerCon()
+#####################################################################################################
+
 
 # con_farmac = FALSE para casos de conexao nao estabelecida
 if(! is.logical(con_farmac) ){
   
   # Get local  connections
-  con_local <- getLocalServerCon()
   
   # con_local = FALSE para casos de conexao nao estabelecida
   if( ! is.logical(con_local) ) {
@@ -48,6 +41,10 @@ if(! is.logical(con_farmac) ){
         else{
           
           if(nrow(sync_dispense_local) > 0){
+            # remover a coluna imported ( nao precisamos dela neste script)
+            sync_dispense_farmac <- sync_dispense_farmac[ , -which( names(sync_dispense_farmac) %in% c("imported"))]
+            sync_dispense_local <- sync_dispense_local[ , -which( names(sync_dispense_local) %in% c("imported"))]
+            
             
             dispenses_to_get <-  anti_join(sync_dispense_farmac, sync_dispense_local,   by=c('id','clinic_name_farmac') )
             
@@ -169,6 +166,8 @@ if(! is.logical(con_farmac) ){
             
             # nao ha dispensas no servidor -> local buscar todas do servidor farmac
             dispenses_to_get <- sync_dispense_farmac
+            dispenses_to_get <- dispenses_to_get[ , -which( names(dispenses_to_get) %in% c("imported"))]
+            
             # status (TRUE/FALSE)  envio com sucesso/ envio sem sucesso
             status <- sendDispenseToServer(con_postgres  = con_local,df.dispenses = dispenses_to_get)
             

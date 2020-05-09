@@ -7,7 +7,7 @@ wd <- '~/Git/farmac-sync/'
 
 
 # Set to TRUE/FALSE
-is.farmac <- TRUE                                    # definir se o codigo vai executar na farmac ou nao
+is.farmac <- FALSE                                    # definir se o codigo vai executar na farmac ou nao
 
 
 farmac.postgres.user ='farmac'                         # ******** modificar
@@ -20,7 +20,7 @@ farmac.postgres.port=5455                              # ******** modificar
 
 local.postgres.user ='postgres'                         # ******** modificar
 local.postgres.password='postgres'                      # ******** modificar
-local.postgres.db.name='farmac_jardim'                          # ******** modificar
+local.postgres.db.name='pharm'                          # ******** modificar
 local.postgres.host='172.18.0.3'                        # ******** modificar
 local.postgres.port=5432                                # ******** modificar
 
@@ -145,18 +145,22 @@ if(checkScriptsExists(files = c('config/config_properties.R','get_dispenses.R','
 
     
   if( ! is.logical(con_local)){
+    
+    
+    
+    if(is.farmac){
+      
+      farmac_name = getMainClinicName(con.local = con_local)
+    } else {
+      
+      main_clinic_name <- getMainClinicName(con.local = con_local)
+    }
+    
+    
     con_farmac <- getFarmacServerCon()
     if(! is.logical(con_farmac)){
       
       message(paste0("Conexoes ", local.postgres.host," & ",farmac.postgres.host, " estabelecidas"))
-      
-      if(is.farmac){
-        
-        farmac_name = getMainClinicName(con.local = con_local)
-      } else {
-        
-        main_clinic_name <- getMainClinicName(con.local = con_local)
-      }
 
     } 
     else {
@@ -165,7 +169,7 @@ if(checkScriptsExists(files = c('config/config_properties.R','get_dispenses.R','
       ## gravar os logs
       message("Algo correu mal, veja os erros na console")
       save(logErro,file = 'logs/logErro.RData')
-      rm(list=setdiff(ls(), c("wd", "is.farmac") ))
+      #rm(list=setdiff(ls(), c("wd", "is.farmac",) ))
 } 
     
   }  else {

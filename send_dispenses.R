@@ -35,7 +35,7 @@ if(! is.logical(con_farmac) ){
            ## filtrar apenas novas dispensas 
            if(nrow(sync_dispense_local)> 0 ){
              # remover a coluna imported ( nao precisamos dela neste script)
-             sync_dispense_farmac <- sync_dispense_farmac[ , -which( names(sync_dispense_farmac) %in% c("imported"))]
+             #sync_dispense_farmac <- sync_dispense_farmac[ , -which( names(sync_dispense_farmac) %in% c("imported"))]
              dispenses_to_send <- anti_join(sync_dispense_local ,sync_dispense_farmac , by=c("id") )
              
              if(nrow(dispenses_to_send) > 0){
@@ -161,6 +161,7 @@ if(! is.logical(con_farmac) ){
            if(nrow(sync_dispense_local)> 0){ 
              
              dispenses_to_send <- sync_dispense_local 
+
             
              if(nrow(dispenses_to_send) > 0){
                

@@ -117,21 +117,7 @@ getLocalServerCon <- function(){
     message(cond)
     
     
-    # guardar o log 
-    # se for um site de farmac entao no log guardamos o nome da FARMAC
-    if(is.farmac ){
-      saveLogError(us.name = farmac_name,
-                   event.date = as.character(Sys.time()),
-                   action = ' getLocalServerCon -> Estabelece uma conexao com o PostgreSQL Local',
-                   error =as.character(cond$message) ) 
-    } else {
-      
-      saveLogError(us.name = main_clinic_name,
-                   event.date = as.character(Sys.time()),
-                   action = ' getLocalServerCon -> Estabelece uma conexao com o PostgreSQL Local',
-                   error =as.character(cond$message) ) 
-    }
-    #Choose a return value in case of error
+ 
     return(FALSE)
   },
   finally = {
@@ -575,4 +561,433 @@ getMainClinicName <- function(con.local) {
   
 }
 
+#' getGenericProvider -> Busca o id do provedor generico
+#'
+#' @param con.local  obejcto de conexao com BD iDART
+#' @return id da provider generico
+#' @examples 
+#' generic_provider <- getGenericProvider(con_local)
+#' 
 
+getGenericProviderID <- function(con.local) {
+  
+  
+  provider   <- dbGetQuery( con.local ,"select id as provider from public.doctor where active = TRUE ; " )
+  
+  return(as.numeric(provider$provider[1]))
+  
+  
+}
+
+
+
+#' getRegimeID -> Busca o id do regime 
+#'
+#' @param con.local  obejecto de conexao com BD iDART
+#' @param regimeesquema nome do esquema
+#' @return id do regime
+#' @examples 
+#' regimeid <- getRegimeID(con_local, 'TDF+3TC+EFV')
+#' 
+# 
+# getRegimeID <- function(con.local, regimeesquema) {
+#   
+#   
+#   regime   <- dbGetQuery( con.local ,
+#                           paste0("select regimeid from public.regimeterapeutico  where regimeesquema = '",regimeesquema,"' and active = TRUE ; " ))
+#   
+#   if(nrow(regime)>0){
+#     return(as.numeric(regime$regimeid[1]))
+#   } else {
+#     return(0)
+#   }
+#   
+#   
+# }
+
+#' getLinhas -> Busca todas linhas T
+#'
+#' @param con.local  obejecto de conexao com BD iDART
+#' @examples 
+#' linha <- getLinhaID(con_local)
+#' 
+
+getLinhas <- function(con.local) {
+  
+  
+  linha   <- dbGetQuery( con.local ,paste0("select * from linhat ; " ) )
+
+  return(linha)
+
+}
+
+ 
+#' getPatientInfo -> Busca o id , nid , nomes e uuid de todos pacientes do iDART
+#'
+#' @param con.local  obejecto de conexao com BD iDART
+#' @examples 
+#' patients <- getPatientInfo(con_local )
+#' 
+
+getPatientInfo <- function(con.local) {
+  
+  patients   <- dbGetQuery(
+    con.local ,
+    paste0(
+      "select pat.id, patientid, firstnames, lastname, uuid ,startreason, pi.value  from public.patient  pat 
+      inner join patientidentifier pi on pi.patient_id = pat.id 
+      left join
+        (
+         select patient, max(startdate), startreason
+           from episode
+            group by patient, startreason
+        )  ep on ep.patient = pat.id ; "
+    )
+  )
+  
+  # Remover transitos
+  patients <-  patients[which(!patients$startreason %in%  c('Paciente em Transito', ' Inicio na maternidade')), ]
+  dfTemp <-  patients[which(grepl(   pattern = "TR", ignore.case = TRUE,  x = patients$patientid  ) == TRUE), ]
+  dfTemp_2 <- patients[which(grepl(  pattern = "VIS",ignore.case = TRUE,  x = patients$patientid ) == TRUE), ]
+  dfTemp_3 <- patients[which(grepl( pattern = "VIA",  ignore.case = TRUE,  x = patients$patientid  ) == TRUE), ]
+
+  
+  patients <-  patients[which(!patients$patientid %in% dfTemp$patientid), ]
+  patients <-    patients[which(!patients$patientid %in% dfTemp_2$patientid), ]
+  patients <-  patients[which(!patients$patientid %in% dfTemp_3$patientid), ]
+
+  
+  rm(dfTemp_2, dfTemp, dfTemp_3)
+  
+  
+  return(patients)
+  
+}
+
+
+
+#' getLastKnownRegimeID -> Busca o id do regime da ultima precricao na BD
+#'
+#' @param con.local  obejecto de conexao com BD iDART
+#' @param patient.id nid
+#' @return id do regime
+#' @examples 
+#' regimeid <- getLastKnownRegimeID(con_local, '12/566')
+#' 
+
+getLastKnownRegimeID <- function(con.local,patient.id) {
+  
+  
+  regime   <- dbGetQuery( con.local ,
+                          paste0("SELECT regimeid  FROM public.prescription where patientid = ",
+                          as.numeric(patient.id),
+                          " order by date desc limit 1; " ))
+  
+  if(nrow(regime)>0){
+    return(as.numeric(regime$regimeid[1]))
+  } else {
+    return(0)
+  }
+  
+  
+}
+
+#' getRegimeID -> Busca o id do regime com base no nome do regime
+#'
+#' @param df.regimes df com regimes padronizados
+#' @param regime.name name
+#' @return id do regime
+#' @examples 
+#' regimeid <- getRegimeID(con_local, '12/566')
+#' 
+
+getRegimeID <- function(df.regimes ,regime.name) {
+  
+  regime  <- df.regimes[which(df.regimes$regimeesquema==regime.name),]
+  if(nrow(regime)>0){
+    if(nrow(regime)==1){
+      return(regime)
+    } else{
+      
+      tmp_regime= subset( df.regimes, regimeesquema==regime.name & active == TRUE ,)
+      return(tmp_regime[1,])
+    }
+  } else{  # vamos procurar pela abreviatura ex : ABC+3TC+LPV/r(2DFC+LPV/r40/10) ->  ABC+3TC+LPV/r
+    
+    size <- nchar(regime.name)
+    if(size>11){
+      regime.name <- substr(regime.name, 1, 13 )
+    }
+    regime = subset(df.regimes, grepl(pattern = regime.name,x = df.regimes$regimeesquema,ignore.case = TRUE),)
+    
+    if(nrow(regime)==1){
+      return(regime)
+    } else if(nrow(regime)>1){
+      dosage <- sub(".*(\\d+{2}).*$", "\\1", regime.name)
+      
+      regime = subset(df.regimes, grepl(pattern = regime.name,x = df.regimes$regimeesquema,ignore.case = TRUE) & grepl(pattern = dosage,x = df.regimes$regimeesquema,ignore.case = TRUE),)
+      if(nrow(regime)>1) {
+        return(regime[1,])
+      } else {
+        return(0)
+      }
+
+    } else { # pega o ulimo regime conhecido (ideia do colaco kkkk)
+      return(0)
+    }
+  }
+  
+}
+
+#' getLinhaID -> Busca o id da Linha 
+#'
+#' @param df.linhas  df com todos linhas T
+#' @param linha  nome  da linha
+#' @return id 
+#' @examples 
+#' id  <- getLinhaID(df.linhas,'1a Linha' ))
+#' 
+
+getLinhaID <- function(df.linhas,linha) {
+  
+  id <- df.linhas$linhaid[which(df.linhas$linhanome==linha)]
+  id
+}
+  
+#' getDrug -> Busca o drug pelo nome
+#'
+#' @param df.drugs  df com todos drugs T
+#' @param linha  nome  da linha
+#' @return id 
+#' @examples 
+#' id  <- getDrugId(df.drugs,'[LPV/RTV]' ))
+#' 
+
+getDrug<- function(df.drugs,drug.name) {
+  
+  drug <- df.drugs[which(df.drugs$name==drug.name),]
+  if(nrow(drug)>0){
+    if(nrow(drug)==1){
+      return(drug)
+    } else{
+      
+      tmp_drug = subset( df.drugs, name==drug.name & active == TRUE & pediatric =='F',)
+      return(tmp_drug)
+    }
+  } else{  # vamos procurar pela abreviatura que esta dentro de parentesis rectos [TDF/3TC/DTG]
+    
+    first_index <- stri_locate_first(drug.name, regex = "\\[")[[1]]
+    second_index <- stri_locate_first(drug.name, regex = "\\]")[[1]]
+    dosage <- sub(".*(\\d+{2}).*$", "\\1", drug.name)
+    
+     abreviatura_drug <- substr(drug.name, first_index+1, second_index-1 )
+     
+     drug = subset(df.drugs, grepl(pattern = abreviatura_drug,x = df.drugs$name,ignore.case = TRUE),)
+     if(nrow(drug)==1){
+       return(drug)
+     } else if(nrow(drug)>1){
+       drug = subset(df.drugs, grepl(pattern = abreviatura_drug,x = df.drugs$name,ignore.case = TRUE) & df.drugs$pediatric=='F' ,)
+       return(drug[1,])
+     } else { # pega qualquer (ideia do colaco kkkk)
+       return(df.drugs[1,])
+     }
+  }
+}
+
+#' getAllDrugs -> Busca todos medicamentos do iDART 
+#'
+#' @param con.postgres  objecto de conexao com  a bd
+#' @return public.drugs 
+#' @examples 
+#' id  <- getAllDrugs(con_local)
+#' 
+# 
+# getAllDrugs <- function(con.postgres) {
+#   
+#   
+#   drugs   <- dbGetQuery( con.local , paste0("SELECT * from public.drug ; " ))
+#   return(drugs)
+#   
+# }
+
+
+#' getLastPrescriptionID -> Buscao id da ultima prescricao criada
+#'
+#' @param con.postgres  objecto de conexao com  a bd
+#' @return id
+#' @examples 
+#' id  <- getLastPrescriptionID(con_local)
+#' 
+
+getLastPrescriptionID <- function(con.postgres) {
+  
+  
+  id <- dbGetQuery( con.local , paste0("select id from prescription order by id desc limit 1; " ))
+  return(id$id)
+  
+}
+
+
+
+
+
+#' getPatientId -> Busca o id do paciente 
+#'
+#' @param df.temp.patients  df com todos pacientes do idart excluindo os transitos
+#' @param patient c(nid,firstnames,lastname)
+#' @return id 
+#' @examples 
+#' id  <- getPatientId(con_local, c('12/3444','Agnaldo Samuel', 'Macuacua'))
+#' 
+
+getPatientId <- function(df.temp.patients,patient) {
+  
+ id <- df.temp.patients$id[which(df.temp.patients$patientid==nid)][1]
+ if(is.na(id)){
+   id <- df.temp.patients$id[which(df.temp.patients$value==nid)][1]
+   if(is.na(id)){
+     pat <- subset(df.temp.patients,firstnames==patient[2]  & lastname ==patient[3])
+     if(nrow(pat)==1){
+       id <- pat$id[1]
+       return(id)
+       
+     } else if(nrow(pat)>1){# paciente duplicado
+       
+       if(pat$uuid[1]==pat$uuid[2]){ # sao pacientes iguais, considere o primeiro
+         
+         id <- pat$id[1]
+         
+         if(is.farmac){
+           
+           saveLogError( us.name = farmac_name,    event.date =as.character(Sys.Date()),
+                         action = 'getPatientId -> Busca o id do paciente',
+                         error =  paste0('ERR_DUP Paciente FARMAC duplicado - ',pat$patientid[1])      )
+         } else {
+           saveLogError( us.name = main_clinic_name,    event.date = as.character(Sys.Date()),
+                         action = 'getPatientId -> Busca o id do paciente',
+                         error =  paste0('ERR_DUP Paciente FARMAC duplicado - ',pat$patientid[1])      )
+         }
+         
+         return(id)
+         
+       } else {
+         
+         
+         if(is.farmac){
+           
+           saveLogError( us.name = farmac_name,    event.date =as.character(Sys.Date()),
+                         action = 'getPatientId -> Busca o id do paciente',
+                         error =  paste0('ERR_DUP Paciente FARMAC duplicado - ',pat$patientid[1])      )
+         } else {
+           saveLogError( us.name = main_clinic_name,    event.date = as.character(Sys.Date()),
+                         action = 'getPatientId -> Busca o id do paciente',
+                         error =  paste0('ERR_DUP Paciente FARMAC duplicado - ',pat$patientid[1])      )
+         }
+         
+         return(0)  # error
+         
+       }
+
+         
+     } else {
+       
+       return(0)  # no patient found
+     }
+     
+   } else{
+       return(id)
+     }
+
+ }else{
+   return(id)
+ }
+
+}
+
+
+
+
+#' composePrescription -> compoe um dataframe de prescricao para actualizar
+#'
+#' @param df.dispense  df dispensa do paciente
+#' @param patient.id id do paciente
+#' @param provider.id  id do doctor
+#' @param linha.id id linha
+#' @return NA 
+#' @examples 
+#' id  <- composePrescription(df.dispense,linha.id, regime.id,provider.id, patient.id)
+#' 
+
+composePrescription <- function(df.dispense,linha.id, regime.id,provider.id, patient.id, nid) {
+ 
+  load('config/prescription.Rdata')
+
+
+  precription <- add_row( precription,
+                         clinicalstage      =0,
+                         current            = 'T',
+                         date               = df.dispense$date[1],
+                         doctor             =provider.id,
+                         duration           =  df.dispense$duration[1],
+                         modified           =   df.dispense$modified[1],
+                         patient            = patient.id,
+                         prescriptionid     =    paste0(nid, '-',df.dispense$date[1]," - Farmac"  )  ,
+                         reasonforupdate    = df.dispense$reasonforupdate[1],
+                         notes              = paste0( 'FARMAC - ',gsub (pattern = 'NA',replacement = '',x = df.dispense$notes[1])), 
+                         enddate            = df.dispense$enddate[1],    
+                         drugtypes          = df.dispense$drugtypes[1],    
+                         regimeid           = regime.id,
+                         datainicionoutroservico = df.dispense$datainicionoutroservico[1],  
+                         motivomudanca      = df.dispense$motivomudanca[1], 
+                         linhaid            = linha.id,
+                         ppe                = df.dispense$ppe[1],   
+                         ptv                = df.dispense$ptv[1],  
+                         tb                 = df.dispense$tb[1],  
+                         tpi                = df.dispense$tpi[1],   
+                         tpc                = df.dispense$tpc[1],
+                          gaac              = df.dispense$gaac[1], 
+                         af                 = df.dispense$af[1],    
+                         ca                 = df.dispense$ca[1],         
+                         ccr                = df.dispense$ccr[1], 
+                         saaj               = df.dispense$saaj[1],   
+                         fr                 =   df.dispense$fr[1] )
+ 
+   
+     return(precription)
+
+  
+}
+
+
+
+
+
+composePrescribedDrugs <- function(df.dispense, prescription.id) {
+  load('config/prescribeddrugs.RData')
+  
+  load(file = 'config/drugs.RData') 
+  
+  for(i in 1:nrow(df.dispense)){
+    
+    drug_name <- df.dispense$drugname[i]
+    drug <- getDrug(df.drugs =drugs,drug.name =drug_name)
+    amt =0
+    if(drug$packsize[1]>30){
+      amt =2
+    } else {
+      amt =1
+    }
+    prescribeddrugs <<- add_row(prescribeddrugs,
+      amtpertime  =amt,
+      drug = drug$id[1]  ,
+      prescription = prescription.id,
+      timesperday =df.dispense$timesperday[i],
+      modified =  df.dispense$modified[i] ,
+      prescribeddrugsindex = i
+      )
+    
+      
+  }
+  
+ #return( prescribeddrugs)
+}
