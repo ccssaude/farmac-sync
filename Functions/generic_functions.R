@@ -1,4 +1,6 @@
-
+library(dplyr)
+library(plyr)
+library(stringi)
 #' getFarmacServerCon -> Estabelece uma conexao com o servidor central - Farmac
 #' 
 #' @param postgres.user username do postgres
@@ -185,14 +187,14 @@ sendLogError <- function(con_postgres , df.logerror ){
     
     # guardar o log 
     if(is.farmac){
-      saveLogError(us.name = main_clinic_name,
+      saveLogError(us.name = farmac_name,
                    event.date = as.character(Sys.time()),
                    action = ' sendLogError -> Envia log de erros para o servidor ',
                    error = as.character(cond$message) )  
       
     } else {
       
-      saveLogError(us.name = farmac_name,
+      saveLogError(us.name = main_clinic_name ,
                    event.date = as.character(Sys.time()),
                    action = ' sendLogError -> Envia log de erros para o servidor',
                    error = as.character(cond$message) )  
@@ -289,14 +291,14 @@ sendLogDispense <- function(con_postgres , df.logdispense ){
     
     # guardar o log 
     if(is.farmac){
-      saveLogError(us.name = main_clinic_name,
+      saveLogError(us.name = farmac_name ,
                    event.date = as.character(Sys.time()),
                    action = 'sendLogDispense -> Envia log de dispensas do servidor farmac para o servidor Local ',
                    error = as.character(cond$message) )  
       
     } else {
       
-      saveLogError(us.name = farmac_name,
+      saveLogError(us.name = main_clinic_name,
                    event.date = as.character(Sys.time()),
                    action = 'sendLogDispense -> Envia log de dispensas da farmac para o servidor Farmac',
                    error = as.character(cond$message) )  
@@ -318,14 +320,14 @@ sendLogDispense <- function(con_postgres , df.logdispense ){
       
       # guardar o log 
       if(fis.farmac){
-        saveLogError(us.name = main_clinic_name,
+        saveLogError(us.name = farmac_name  ,
                      event.date = as.character(Sys.time()),
                      action = 'sendLogDispense -> Envia log de dispensas do servidor FARMAC  para o servidor local ',
                      error = as.character(cond$message) )  
         
       } else {
         
-        saveLogError(us.name = farmac_name,
+        saveLogError(us.name = main_clinic_name,
                      event.date = as.character(Sys.time()),
                      action = 'sendLogDispense -> Envia log de dispensas da farmac para o servidor Farmac',
                      error = as.character(cond$message) )  
@@ -358,6 +360,304 @@ sendLogDispense <- function(con_postgres , df.logdispense ){
 
 
 
+#' savePackageDrugInfoTmp -> insere um registo na tabela savePackageDrugInfoTmp
+#' 
+#' @param con_postgres  obejcto de conexao com BD
+#' @param df o datafrane com o mesmo formato da tabela savePackageDrugInfoTmp
+#' @param table.name o nome da tabela na BD
+#' @return TRUE/FALSE
+#' @examples 
+#' 
+#' status <- savePackageDrugInfoTmp(con_farmac,df.packagedruginfotmp)
+
+
+savePackageDrugInfoTmp <- function(con_postgres , df.packagedruginfotmp){
+  
+  # status (TRUE/FALSE)  envio com sucesso/ envio sem sucesso
+  status <- tryCatch({
+    
+    status_send <- dbWriteTable( con_postgres, "packagedruginfotmp", df.packagedruginfotmp, row.names=FALSE, append=TRUE)
+    
+    ## se occorer algum erro , no envio esta parte nao vai executar
+    status_send <- TRUE
+    return(status_send)
+    
+  },
+  error = function(cond) {
+    
+    ## Coisas a fazer se occorre um erro 
+    # imprimir msg na consola
+    message(cond$message)
+    
+    # guardar o log 
+    if(is.farmac){
+      saveLogError(us.name = farmac_name ,
+                   event.date = as.character(Sys.time()),
+                   action = paste0( "  savePackageDrugInfoTmp -> insere um registo na tabela savePackageDrugInfoTmp"),
+                   error = as.character(cond$message) )  
+      
+    } else {
+      
+      saveLogError(us.name = main_clinic_name ,
+                   event.date = as.character(Sys.time()),
+                   action = paste0( "  savePackageDrugInfoTmp -> insere um registo na tabela savePackageDrugInfoTmp"),
+                   error = as.character(cond$message) )  
+    }
+    
+    
+    #Choose a return value in case of error
+    return(FALSE)
+  }, 
+  warning = function(cond) {
+    
+    ## Coisas a fazer se ocorrer um erro 
+    
+    # imprimir msg na consola
+    message(cond$message)
+    
+    # Se for um waring em que nao foi possivel buscar os dados guardar no log e return FALSE
+    if(grepl(pattern = 'Could not create execute',x = cond$message,ignore.case = TRUE)){
+      
+      # guardar o log 
+      if(is.farmac){
+        saveLogError(us.name =farmac_name ,
+                     event.date = as.character(Sys.time()),
+                     action = paste0( "  savePackageDrugInfoTmp -> insere um registo na tabela savePackageDrugInfoTmp"),
+                     error = as.character(cond$message) )  
+        
+      } else {
+        
+        saveLogError(us.name =main_clinic_name  ,
+                     event.date = as.character(Sys.time()),
+                     action = paste0( "  savePackageDrugInfoTmp -> insere um registo na tabela savePackageDrugInfoTmp"),
+                     error = as.character(cond$message) )  
+      }
+      
+      
+      return(FALSE)
+      
+    } else {
+      
+      if (exists('status_send')){
+        
+        return(status_send)
+      } else {
+        return(FALSE)
+      }
+      
+      
+    }
+    
+  },
+  finally = {
+    # NOTE:
+    # Here goes everything that should be executed at the end,
+    # Do nothing
+  })
+  
+  return(status)
+}
+
+
+#' savePackage -> insere um registo numa tabela Package
+#' 
+#' @param con_postgres  obejcto de conexao com BD
+#' @param df.package o datafrane com o mesmo formato da tabelaPackage
+#' @return TRUE/FALSE
+#' @examples 
+#' 
+#' status <- savePackage(con_farmac, df.package)
+
+
+savePackage <- function(con_postgres , df.package){
+  
+  # status (TRUE/FALSE)  envio com sucesso/ envio sem sucesso
+  status <- tryCatch({
+    
+    status_send <- dbWriteTable(con_postgres,"package", df.package, row.names=FALSE, append=TRUE)
+    
+    ## se occorer algum erro , no envio esta parte nao vai executar
+    status_send <- TRUE
+    return(status_send)
+    
+  },
+  error = function(cond) {
+    
+    ## Coisas a fazer se occorre um erro 
+    # imprimir msg na consola
+    message(cond$message)
+    
+    # guardar o log 
+    if(is.farmac){
+      saveLogError(us.name = farmac_name ,
+                   event.date = as.character(Sys.time()),
+                   action = paste0( " savePackage -> insere um registo numa tabela Package"),
+                   error = as.character(cond$message) )  
+      
+    } else {
+      
+      saveLogError(us.name = main_clinic_name ,
+                   event.date = as.character(Sys.time()),
+                   action = paste0( " savePackage -> insere um registo numa tabela Package"),
+                   error = as.character(cond$message) )  
+    }
+    
+    
+    #Choose a return value in case of error
+    return(FALSE)
+  }, 
+  warning = function(cond) {
+    
+    ## Coisas a fazer se ocorrer um erro 
+    
+    # imprimir msg na consola
+    message(cond$message)
+    
+    # Se for um waring em que nao foi possivel buscar os dados guardar no log e return FALSE
+    if(grepl(pattern = 'Could not create execute',x = cond$message,ignore.case = TRUE)){
+      
+      # guardar o log 
+      if(is.farmac){
+        saveLogError(us.name =farmac_name ,
+                     event.date = as.character(Sys.time()),
+                     action = paste0( " savePackage -> insere um registo numa tabela Package"),
+                     error = as.character(cond$message) )  
+        
+      } else {
+        
+        saveLogError(us.name =main_clinic_name  ,
+                     event.date = as.character(Sys.time()),
+                     action = paste0( " savePackage -> insere um registo numa tabela Package"),
+                     error = as.character(cond$message) )  
+      }
+      
+      
+      return(FALSE)
+      
+    } else {
+      
+      if (exists('status_send')){
+        
+        return(status_send)
+      } else {
+        return(FALSE)
+      }
+      
+      
+    }
+    
+  },
+  finally = {
+    # NOTE:
+    # Here goes everything that should be executed at the end,
+    # Do nothing
+  })
+  
+  return(status)
+}
+
+
+
+
+
+#' savePackagedDrugs -> insere um registo numa tabela PackagedDrug
+#' 
+#' @param con_postgres  obejcto de conexao com BD
+#' @param df.packageddrugs o datafrane com o mesmo formato da tabela PackagedDrug
+#' @return TRUE/FALSE
+#' @examples 
+#' 
+#' status <- savePackagedDrugs(con_farmac,df.packageddrugs)
+
+
+savePackagedDrugs <- function(con_postgres , df.packageddrugs){
+  
+  # status (TRUE/FALSE)  envio com sucesso/ envio sem sucesso
+  status <- tryCatch({
+    
+    status_send <- dbWriteTable(con_postgres,"packageddrugs", df.packageddrugs, row.names=FALSE, append=TRUE)
+    
+    ## se occorer algum erro , no envio esta parte nao vai executar
+    status_send <- TRUE
+    return(status_send)
+    
+  },
+  error = function(cond) {
+    
+    ## Coisas a fazer se occorre um erro 
+    # imprimir msg na consola
+    message(cond$message)
+    
+    # guardar o log 
+    if(is.farmac){
+      saveLogError(us.name = farmac_name ,
+                   event.date = as.character(Sys.time()),
+                   action = paste0( " savePackagedDrugs -> insere um registo numa tabela Package"),
+                   error = as.character(cond$message) )  
+      
+    } else {
+      
+      saveLogError(us.name = main_clinic_name ,
+                   event.date = as.character(Sys.time()),
+                   action = paste0( " savePackagedDrugs -> insere um registo numa tabela Package"),
+                   error = as.character(cond$message) )  
+    }
+    
+    
+    #Choose a return value in case of error
+    return(FALSE)
+  }, 
+  warning = function(cond) {
+    
+    ## Coisas a fazer se ocorrer um erro 
+    
+    # imprimir msg na consola
+    message(cond$message)
+    
+    # Se for um waring em que nao foi possivel buscar os dados guardar no log e return FALSE
+    if(grepl(pattern = 'Could not create execute',x = cond$message,ignore.case = TRUE)){
+      
+      # guardar o log 
+      if(is.farmac){
+        saveLogError(us.name =farmac_name ,
+                     event.date = as.character(Sys.time()),
+                     action = paste0( " savePackagedDrugs -> insere um registo numa tabela Package"),
+                     error = as.character(cond$message) )  
+        
+      } else {
+        
+        saveLogError(us.name =main_clinic_name  ,
+                     event.date = as.character(Sys.time()),
+                     action = paste0( " savePackagedDrugs -> insere um registo numa tabela Package"),
+                     error = as.character(cond$message) )  
+      }
+      
+      
+      return(FALSE)
+      
+    } else {
+      
+      if (exists('status_send')){
+        
+        return(status_send)
+      } else {
+        return(FALSE)
+      }
+      
+      
+    }
+    
+  },
+  finally = {
+    # NOTE:
+    # Here goes everything that should be executed at the end,
+    # Do nothing
+  })
+  
+  return(status)
+}
+
+
 
 
 
@@ -379,7 +679,7 @@ getLogDispenseFromServer <- function(con.farmac, clinic.name) {
   log_dispenses <- tryCatch({
     
     
-    temp_logs <- dbGetQuery( con.farmac , paste0("SELECT  unidade_sanitaria, data_evento, paciente, data_levantamento FROM public.logdispense where unidade_sanitaria='", clinic.name, "' ;" )  )
+    temp_logs <- dbGetQuery( con.farmac , paste0("SELECT  unidade_sanitaria, data_evento, paciente, data_levantamento FROM logdispense where unidade_sanitaria='", clinic.name, "' ;" )  )
     
     return(temp_logs)
     
@@ -468,7 +768,7 @@ getLogErrorFromServer <- function(con.farmac, clinic.name) {
   log_errors <- tryCatch({
     
     
-    temp_logs <- dbGetQuery( con.farmac , paste0("SELECT  us, data_evento, accao, erro FROM public.logerro where us = ''", clinic.name, "' ;" )  )
+    temp_logs <- dbGetQuery( con.farmac , paste0("SELECT  us, data_evento, accao, erro FROM logerro where us = ''", clinic.name, "' ;" )  )
     
     return(temp_logs)
     
@@ -540,8 +840,6 @@ getLogErrorFromServer <- function(con.farmac, clinic.name) {
 
 
 
-
-
 #' getMainClinicName -> Busca o nome da US na tabela clinic
 #'
 #' 
@@ -554,7 +852,7 @@ getLogErrorFromServer <- function(con.farmac, clinic.name) {
 getMainClinicName <- function(con.local) {
   
   
-  clinic_name   <- dbGetQuery( con.local ,"select clinicname from public.clinic where mainclinic = TRUE ; " )
+  clinic_name   <- dbGetQuery( con.local ,"select clinicname from clinic where mainclinic = TRUE ; " )
     
     return(clinic_name$clinicname[1])
  
@@ -572,7 +870,7 @@ getMainClinicName <- function(con.local) {
 getGenericProviderID <- function(con.local) {
   
   
-  provider   <- dbGetQuery( con.local ,"select id as provider from public.doctor where active = TRUE ; " )
+  provider   <- dbGetQuery( con.local ,"select id as provider from doctor where active = TRUE ; " )
   
   return(as.numeric(provider$provider[1]))
   
@@ -594,7 +892,7 @@ getGenericProviderID <- function(con.local) {
 #   
 #   
 #   regime   <- dbGetQuery( con.local ,
-#                           paste0("select regimeid from public.regimeterapeutico  where regimeesquema = '",regimeesquema,"' and active = TRUE ; " ))
+#                           paste0("select regimeid from regimeterapeutico  where regimeesquema = '",regimeesquema,"' and active = TRUE ; " ))
 #   
 #   if(nrow(regime)>0){
 #     return(as.numeric(regime$regimeid[1]))
@@ -634,7 +932,7 @@ getPatientInfo <- function(con.local) {
   patients   <- dbGetQuery(
     con.local ,
     paste0(
-      "select pat.id, patientid, firstnames, lastname, uuid ,startreason, pi.value  from public.patient  pat 
+      "select pat.id, patientid, firstnames, lastname, uuid ,startreason, pi.value  from patient  pat 
       inner join patientidentifier pi on pi.patient_id = pat.id 
       left join
         (
@@ -665,6 +963,28 @@ getPatientInfo <- function(con.local) {
 }
 
 
+#' getLastPackageDrugInfoTmpID -> Busca o utlimo  id da tabela PackageDrugInfoTmp  na BD
+#'
+#' @param con.local  obejecto de conexao com BD iDART
+#' @return id do ultimo registo em  PackageDrugInfoTmp 
+#' @examples 
+#' id <- getLastPackageDrugInfoTmpID(con_local)
+#' 
+
+getLastPackageDrugInfoTmpID <- function(con.local) {
+  
+  
+  id    <- dbGetQuery( con.local ,
+                          paste0("SELECT id  FROM packagedruginfotmp order by id desc limit 1 ; " ))
+  
+  if(nrow(id)>0){
+    return(as.numeric(id$id[1]))
+  } else {
+    return(0)
+  }
+  
+  
+}
 
 #' getLastKnownRegimeID -> Busca o id do regime da ultima precricao na BD
 #'
@@ -679,7 +999,7 @@ getLastKnownRegimeID <- function(con.local,patient.id) {
   
   
   regime   <- dbGetQuery( con.local ,
-                          paste0("SELECT regimeid  FROM public.prescription where patientid = ",
+                          paste0("SELECT regimeid  FROM prescription where patient = ",
                           as.numeric(patient.id),
                           " order by date desc limit 1; " ))
   
@@ -691,6 +1011,60 @@ getLastKnownRegimeID <- function(con.local,patient.id) {
   
   
 }
+
+
+
+#' getLastPrescriptionID -> Busca o id da ultima precricao na BD
+#'
+#' @param con.local  obejecto de conexao com BD iDART
+#' @return id da ultima precricao
+#' @examples 
+#' precricaoid <- getLastPrescriptionID(con_local)
+#' 
+
+getLastPrescriptionID <- function(con.local) {
+  
+  
+  prescriptionid   <- dbGetQuery( con.local ,
+                          paste0("SELECT id  FROM prescription order by id desc limit 1; " ))
+  
+  if(nrow(prescriptionid)>0){
+    return(as.numeric(prescriptionid$id[1]))
+  } else {
+    return(0)
+  }
+  
+  
+}
+
+
+#' getLastPrescribedDrugID -> Busca o id da ultima getLastPrescribedDrug na BD
+#'
+#' @param con.local  obejecto de conexao com BD iDART
+#' @return id do PrescribedDrug
+#' @examples 
+#' precricaoid <- getLastPrescribedDrugID(con_local)
+#' 
+
+getLastPrescribedDrugID <- function(con.local) {
+  
+  
+     prescribeddrug   <- dbGetQuery( con.local ,
+                                  paste0("SELECT id  FROM prescribeddrugs order by id desc limit 1; " ))
+  
+  if(nrow(prescribeddrug)>0){
+    return(as.numeric(prescribeddrug$id[1]))
+  } else {
+    return(0)
+  }
+  
+  
+}
+
+
+
+
+
 
 #' getRegimeID -> Busca o id do regime com base no nome do regime
 #'
@@ -805,7 +1179,7 @@ getDrug<- function(df.drugs,drug.name) {
 # getAllDrugs <- function(con.postgres) {
 #   
 #   
-#   drugs   <- dbGetQuery( con.local , paste0("SELECT * from public.drug ; " ))
+#   drugs   <- dbGetQuery( con.local , paste0("SELECT * from drug ; " ))
 #   return(drugs)
 #   
 # }
@@ -822,11 +1196,42 @@ getDrug<- function(df.drugs,drug.name) {
 getLastPrescriptionID <- function(con.postgres) {
   
   
-  id <- dbGetQuery( con.local , paste0("select id from prescription order by id desc limit 1; " ))
+  id <- dbGetQuery( con.postgres , paste0("select id from prescription order by id desc limit 1; " ))
   return(id$id)
   
 }
 
+#' getLastPackageID -> Busca id do ultimo package criado
+#'
+#' @param con.postgres  objecto de conexao com  a bd
+#' @return id dao ultimo registo em package
+#' @examples 
+#' id  <- getLastPackageID(con_local)
+#' 
+
+getLastPackageID <- function(con.postgres) {
+  
+  
+  id <- dbGetQuery( con.postgres , paste0("select id from package order by id desc limit 1; " ))
+  return(id$id)
+  
+}
+
+#' getLastPackagedDrugsID -> Busca id do ultimo packageddrugs criado
+#'
+#' @param con.postgres  objecto de conexao com  a bd
+#' @return id dao ultimo registo em packageddrugs
+#' @examples 
+#' id  <- getLastPackagedDrugsID(con_local)
+#' 
+
+getLastPackagedDrugsID <- function(con.postgres) {
+  
+  
+  id <- dbGetQuery( con.postgres , paste0("select id from packageddrugs order by id desc limit 1; " ))
+  return(id$id)
+  
+}
 
 
 
@@ -841,6 +1246,8 @@ getLastPrescriptionID <- function(con.postgres) {
 #' 
 
 getPatientId <- function(df.temp.patients,patient) {
+  
+  nid <- patient[1]
   
  id <- df.temp.patients$id[which(df.temp.patients$patientid==nid)][1]
  if(is.na(id)){
@@ -913,12 +1320,13 @@ getPatientId <- function(df.temp.patients,patient) {
 #' @param patient.id id do paciente
 #' @param provider.id  id do doctor
 #' @param linha.id id linha
+#' @param prescription.id id da prescricao -> gerado aleatoriamente
 #' @return NA 
 #' @examples 
-#' id  <- composePrescription(df.dispense,linha.id, regime.id,provider.id, patient.id)
+#' prescription  <- composePrescription(df.dispense,linha.id, regime.id,provider.id, patient.id)
 #' 
 
-composePrescription <- function(df.dispense,linha.id, regime.id,provider.id, patient.id, nid) {
+composePrescription <- function(df.dispense,linha.id, regime.id,provider.id, patient.id, nid,prescription.id) {
  
   load('config/prescription.Rdata')
 
@@ -931,9 +1339,9 @@ composePrescription <- function(df.dispense,linha.id, regime.id,provider.id, pat
                          duration           =  df.dispense$duration[1],
                          modified           =   df.dispense$modified[1],
                          patient            = patient.id,
-                         prescriptionid     =    paste0(nid, '-',df.dispense$date[1]," - Farmac"  )  ,
+                         prescriptionid     =    paste0(nid, '-', gsub(pattern = ' ',replacement = '_', x =df.dispense$date[1] ),"_Farmac"  )  ,
                          reasonforupdate    = df.dispense$reasonforupdate[1],
-                         notes              = paste0( 'FARMAC - ',gsub (pattern = 'NA',replacement = '',x = df.dispense$notes[1])), 
+                         notes              = paste0( 'FARMAC-',gsub (pattern = 'NA',replacement = '',x = df.dispense$notes[1])), 
                          enddate            = df.dispense$enddate[1],    
                          drugtypes          = df.dispense$drugtypes[1],    
                          regimeid           = regime.id,
@@ -950,7 +1358,8 @@ composePrescription <- function(df.dispense,linha.id, regime.id,provider.id, pat
                          ca                 = df.dispense$ca[1],         
                          ccr                = df.dispense$ccr[1], 
                          saaj               = df.dispense$saaj[1],   
-                         fr                 =   df.dispense$fr[1] )
+                         fr                 =   df.dispense$fr[1] ,
+                         id                 = prescription.id)
  
    
      return(precription)
@@ -960,12 +1369,21 @@ composePrescription <- function(df.dispense,linha.id, regime.id,provider.id, pat
 
 
 
+#' composePrescribedDrugs -> compoe um dataframe de  um prescribeddrugs drgus para inserir 
+#'
+#' @param df.dispense  df dispensa do paciente
+#' @param prescription.id  id da prescicao
+#' @param prescribed.drug.id id por inserir na tabela
+#' @return NA 
+#' @examples 
+#' df_prescruibed_drugs  <- composePrescribedDrugs(df.dispense, prescription.id, prescribed.drug.id)
+#' 
 
-
-composePrescribedDrugs <- function(df.dispense, prescription.id) {
-  load('config/prescribeddrugs.RData')
+composePrescribedDrugs <- function(df.dispense, prescription.id, prescribed.drug.id) {
   
-  load(file = 'config/drugs.RData') 
+  load('config/prescribeddrugs.RData')
+  # load(file = 'config/drugs.RData') 
+  # drugs <- dbGetQuery(con_local, 'select * from drug  ;')
   
   for(i in 1:nrow(df.dispense)){
     
@@ -977,17 +1395,167 @@ composePrescribedDrugs <- function(df.dispense, prescription.id) {
     } else {
       amt =1
     }
+    prescribeddrugsindex = i -1
     prescribeddrugs <<- add_row(prescribeddrugs,
       amtpertime  =amt,
       drug = drug$id[1]  ,
       prescription = prescription.id,
       timesperday =df.dispense$timesperday[i],
       modified =  df.dispense$modified[i] ,
-      prescribeddrugsindex = i
+      prescribeddrugsindex = prescribeddrugsindex,
+      id = prescribed.drug.id
       )
     
       
   }
   
- #return( prescribeddrugs)
+  #prescribeddrugs
+  
 }
+
+
+
+#' composePackage -> compoe um dataframe de um package  para inserir 
+#'
+#' @param df.dispense  df dispensa do paciente
+#' @param prescription.id  id da prescicao
+#' @param prescribed.drug.id id por inserir na tabela
+#' @return NA 
+#' @examples 
+#' df_prescruibed_drugs  <- composePrescribedDrugs(df.dispense, prescription.id, prescribed.drug.id)
+#' 
+
+composeAndSavePackage <- function(df.packagedruginfotmp, prescription.to.save) {
+
+  load(file = 'config/package.RData') 
+  load(file = 'config/packageddrugs.RData')
+  
+  id_package <- getLastPackageID(con_local)
+  
+  id_package <-  id_package + (3)*sample(1:9, 1) + 4  # random id generation
+  
+   package <<- add_row(
+    package,
+    id = id_package,
+    pickupdate = prescription.to.save$date[1],
+    packdate =  prescription.to.save$date[1],
+    packageid = prescription.to.save$prescriptionid[1],
+    modified= 'T',
+    prescription =prescription.to.save$id[1],
+    clinic = 2, # warning, this is  hardcoded
+    weekssupply = df.packagedruginfotmp$weekssupply[1],
+    dateleft =prescription.to.save$date[1],
+    datereceived = prescription.to.save$date[1],
+    drugtypes = 'ARV'
+  )
+
+
+}
+
+
+#' composePackageDrugInfoTmp -> compoe um dataframe de um package  para inserir 
+#'
+#' @param df.dispense  df dispensa do paciente
+#' @param prescription.id  id da prescicao
+#' @param prescribed.drug.id id por inserir na tabela
+#' @return NA 
+#' @examples 
+#' df_prescruibed_drugs  <- composePackageDrugInfoTmp(df.patient.dispenses, prescription.id, prescribed.drug.id)
+#' 
+
+composePackageDrugInfoTmp <- function(df.patient.dispenses, user.id) {
+  
+  load(file = 'config/packagedruginfotmp.RData') 
+  
+
+    # para cada drug associar um stock
+    drug_name <- df.patient.dispenses$drugname[1]
+    drug <- getDrug(df.drugs = drugs,drug_name )
+    stock <- getStockForDrug(con_local,drug$id[1])
+    id <- getLastPackageDrugInfoTmpID(con_local)
+    id <- id + sample(1:9, 1)*(2*3)
+    
+  packagedruginfotmp <<- add_row(
+    packagedruginfotmp,
+    id = id,
+    amountpertime = '0',
+    clinic = main_clinic_name,
+    dispensedqty = 0,
+    batchnumber = "",
+    formlanguage1 = "",
+    formlanguage2 = "",
+    formlanguage3 = "",
+    drugname = drug_name,
+    expirydate = df.patient.dispenses$expirydate[1],
+    patientid = df.patient.dispenses$patientid[1],
+    patientfirstname = df.patient.dispenses$patientfirstname[1],
+    patientlastname= df.patient.dispenses$patientlastname[1],
+    specialinstructions1 = "",
+    specialinstructions2 = "",
+    stockid = stock$id[1],
+    timesperday= df.patient.dispenses$timesperday[1],
+    numberoflabels =0,
+    cluser = user.id,
+    dispensedate = df.patient.dispenses$dispensedate[1],
+    weekssupply= df.patient.dispenses$weekssupply[1],
+    qtyinhand = df.patient.dispenses$qtyinhand[1],
+    summaryqtyinhand = df.patient.dispenses$summaryqtyinhand[1],
+    qtyinlastbatch = df.patient.dispenses$qtyinlastbatch[1],
+    prescriptionduration = df.patient.dispenses$duration[1],
+    dateexpectedstring = df.patient.dispenses$dateexpectedstring[1],
+    pickupdate = df.patient.dispenses$pickupdate[1],
+    notes = ""
+)
+
+}
+
+
+
+#' getStockForDrug -> retorna o stock existente de um drug
+#' se nao encontrar o stock associado ao drug retorna qualquer um
+#' @param con.postgres  con com BD
+#' @param drug.id  id da drug
+#' @return stock 
+#' @examples 
+#' stock  <- getStockForDrug(con.postgres,drug.id)
+#' 
+
+  getStockForDrug <- function(con.postgres, drug.id) {
+  
+ stock_list <- dbGetQuery(con.postgres, paste0("select * from stock where drug = ",
+                                           drug.id,
+                                          " order by expirydate ASC, datereceived ASC, id ASC"))
+ 
+ if(nrow(stock_list)==0){
+   
+   stock <- dbGetQuery(con.postgres, paste0("select * from  stock where hasunitsremaining='T'; "))
+   stock <- stock[1,]
+ } else {
+   
+   stock = stock_list[1,]
+ }
+
+ 
+ return(stock)
+  
+  }
+  
+  
+  
+  
+  #' getAdminUser -> retorna a informacao do user admin no iDART
+  #' @param con.postgres  con com BD
+  #' @return admin 
+  #' @examples 
+  #' user_admin  <- getAdminUser(con.postgres)
+  #' 
+  
+  getAdminUser <- function(con.postgres) {
+    
+    admin <- dbGetQuery(con.postgres, paste0("select * from users where cl_username = 'admin' ;"))
+
+    
+    return(admin)
+    
+  }
+  

@@ -9,92 +9,194 @@ if(!is.logical(dispenses_to_send_openmrs)){
     
     # pacientes do iDART para buscar o iD
     tmp_patients <- getPatientInfo(con_local)
-    all_patient_nids <- unique(dispenses_to_send_openmrs$patientid)
     
+    
+    no_dups_dispenses <- distinct(dispenses_to_send_openmrs,as.Date(dispensedate), drugname, .keep_all = TRUE )
+    no_dups_dispenses$'as.Date(dispensedate)' <- NULL
+  
+    all_patient_nids <- unique(no_dups_dispenses$patientid)
+    
+
     # processa info de cada paciente
     for (i in 1:length(all_patient_nids)) {
       
       nid <- all_patient_nids[i]
-
-      all_patient_dispense <- dispenses_to_send_openmrs[which(dispenses_to_send_openmrs$patientid==nid),]
+      all_patient_dispenses <- no_dups_dispenses[which(no_dups_dispenses$patientid==nid),]
+      all_patient_dispenses_dups <- all_patient_dispenses[duplicated(as.Date(all_patient_dispenses$dispensedate)),]
+      drugs <- dbGetQuery(con_local, 'select * from drug  ;')
+      regimes <- dbGetQuery(con_local, 'select * from regimeterapeutico where active=TRUE ;')
       
-      
-      
-      # varias dispensas por pacientes ( pode ser varios medicamentos tambem)
-      if(nrow(all_patient_dispense) > 1){
+      # Todas linhas sao prescicao unica ( paciente levou um frasco)
+      if(nrow(all_patient_dispenses_dups)==0){
         
-      } else {  
+        for (j in 1:nrow(all_patient_dispenses)) {
+          
+          
+        patient <-  c(nid, all_patient_dispenses$patientfirstname[j],all_patient_dispenses$patientlastname[j])
+        patient_id  <- getPatientId(tmp_patients,patient)
         
-        patient <- c(nid, all_patient_dispense$patientfirstname[1],all_patient_dispense$patientlastname[1])
-        patient_id        <- getPatientId(tmp_patients,patient)
         if(patient_id==0){
           save(logErro,file='logs/logErro.RData')
-          stop("paciente nao existe na BD local  gravar um erro")  
+          message ("paciente nao existe na BD local  gravar um erro . e passar para o proxmo") 
+          break
+        }
+        ######################################################################
+        ################### Load estrutura das tabelas
+        # load(file = 'config/prescription.Rdata')
+       # load(file = 'config/prescribeddrugs.RData')
+        #load(file = 'config/regimes.RData')
+        load(file = 'config/linhast.RData')
+          
+        ## ******  Provider ID
+        ############################################################################
+        provider_id       <- getGenericProviderID(con_local)
+        ## ******  Regime ID
+        ############################################################################
+        regimet <- getRegimeID(df.regimes = regimes,regime.name =all_patient_dispenses$regimeid[j] )
+        if(class(regimet)=="data.frame"){
+          
+          regime_id <- regimet$regimeid[1]
           
         } else {
-          load(file = 'config/prescription.Rdata')
-          load(file = 'config/prescribeddrugs.RData')
-          load(file = 'config/drugs.RData')
-          load(file = 'config/regimes.RData')
-          load(file = 'config/linhast.RData')
-          ## ******  provider
-          provider_id       <- getGenericProviderID(con_local)
-          
-          
-          ## ******  regime
-          regimet <- getRegimeID(df.regimes = regimes,regime.name =all_patient_dispense$regimeid[1] )
-          
-          if(class(regimet)=="data.frame"){
-            
-            regime_id <- regimet$regimeid[1]
-            
-          } else {
-            regime_id <- getLastKnownRegimeID(con.local = con_local,patient.id =patient_id)
-          }
-          
-          message(regime_id)
-          
-          ## ******  LinhaT
-          
-          linha_id          <- getLinhaID(linhas,linha =all_patient_dispense$linhaid[1])
-          message(linha_id)
-          
-          prescription_to_save <- composePrescription(df.dispense = all_patient_dispense[1,],
-                                              linha.id = linha_id,
-                                              regime.id = regime_id,
-                                              provider.id = provider_id,
-                                              patient.id = patient_id,
-                                              nid =nid
-                                              )
-          
-          prescription_to_save$id <- NULL
-          
-           status <- saveNewPrescription(con_postgres = con_local,df.prescription =prescription_to_save )
-           if(status){
-             
-             ## processa prescribed drugs
-             
-           }
-          
+          regime_id <- getLastKnownRegimeID(con.local = con_local,patient.id =patient_id)
         }
+        ## ******  LinhaT ID
+        ############################################################################
+        linha_id          <- getLinhaID(linhas,linha = all_patient_dispenses$linhaid[j])
+        ############################################################################\
+        ## ******  PrescriptionID 
+        ############################################################################
+        prescription_id <- getLastPrescriptionID(con_local)
+        prescription_id <- prescription_id + sample(1:15, 1)*(i+j)  ##  gerao aleatoria de ID apartir do ultimo
+        
+         prescription_to_save <- composePrescription(df.dispense = all_patient_dispenses[j,],
+                                                linha.id = linha_id,
+                                                regime.id = regime_id,
+                                                provider.id = provider_id,
+                                                patient.id = patient_id,
+                                                nid =nid,
+                                                prescription.id =prescription_id
+                                                )
+            
+              # salva a prescricao
+             if(nrow(prescription_to_save)>0){
+               status <- saveNewPrescription(con_postgres = con_local,df.prescription =prescription_to_save )
+               
+               if(status){ # se salvou com sucesso, gravar a prescribed drugs e 
+                 
+                 prescribed_drug_id <- getLastPrescribedDrugID(con_local)
+                 prescribed_drug_id <- prescribed_drug_id + sample(1:18, 1)*(i+j)  ##  gerao aleatoria de ID apartir do ultimo
+                 composePrescribedDrugs( all_patient_dispenses[j,] , prescription_id, prescribed_drug_id )
+                 prescribed_drug <- prescribeddrugs
+                 
+                 if( nrow(prescribed_drug ) >0){
+                   
+                   status_pd <- saveNewPrescribedDrug(con_local,prescribed_drug)
+                   
+                   if(status_pd){
+                     message("Prescription and prescribed_drug saved sucessfully. ") 
+                     # set current = 'F' on others prescription
+                      dbSendQuery(con_local, paste0("update prescription set current ='F' where patient =",
+                                                   prescription_to_save$patient[1], " and id <> ",prescription_id, " ; " ) )
+                     
+                     
+                  
+                     # processa package, packagedrugs & packaagedruginfotmp
+                     composePackageDrugInfoTmp(all_patient_dispenses[j,] ,user_admin$id[1])
+        
+                     
+                     package_to_save <- composeAndSavePackage(df.packagedruginfotmp = packagedruginfotmp,
+                                                              prescription.to.save = prescription_to_save)
+                     
+                       load(file = 'config/packageddrugs.RData')
+                    
+               
+                       id_pd <- getLastPackagedDrugsID(con_local)
+                       id_pd <-  id_pd + (6)*sample(1:16, 1) + 17  # random id generation
+                       
+                       packageddrugsindex <- 0
+                       
+                       packageddrugs <<- add_row(packageddrugs,
+                                                 id = id_pd,
+                                                 amount = packagedruginfotmp$dispensedqty[1],
+                                                 parentpackage= package_to_save$id[1] ,
+                                                 stock=packagedruginfotmp$stockid[1],
+                                                 modified='T',
+                                                 packageddrugsindex = packageddrugsindex)
+                       
+                       
+                       packagedruginfotmp$packageid[1]     <-  package_to_save$id[1]
+                       packagedruginfotmp$notes[1]         <- all_patient_dispenses[j,]$notes[1]
+                       packagedruginfotmp$packageddrug[1]  <- id_pd
+                       
+                       status_p <-  savePackage(con_local, package )
+                       if(status_p){
+                         
+                         status_pd <-  savePackagedDrugs(con_local, packageddrugs )
+                         
+                         if(status_pd){
+                           status_pdit <- savePackageDrugInfoTmp(con_local,packagedruginfotmp )
+                           if(status_pdit){
+                             message('hurray!!!! everythings was saved')
+                             return(TRUE)
+                           }
+                           
+                         } else {
+                           ## rollback
+                           status_rollback <- dbSendQuery(con_local, paste0("delete from package where id =",package_to_save$id[1], " ;" ))
+                           message (paste0( 'Erro ao gravar package : Rollback status:') )
+                           save(logErro, file = 'logs/logErro.RData')
+                         }
+                         
+                       } else {
+                         message ('Erro ao gravar package')
+                         save(logErro, file = 'logs/logErro.RData')
+                       }
+
+                   } else { # roll back 
+                     dbSendQuery(con_local, paste0(' delete from prescription where id = ',prescription_id ,' ;' ))
+                     save(logErro,file='logs/logErro.RData')
+                     message("Erro ao salvar prescricao") 
+                     
+                   }
+                 } else {
+                   # roll back 
+                   #dbSendQuery(con_local, paste0(' delete from prescription where id =',prescription_id ,' ;' ))
+                   save(logErro,file='logs/logErro.RData')
+                   message("Erro ao salvar prescricao") 
+                   
+                   
+                 } 
+               } else {
+                 save(logErro,file='logs/logErro.RData')
+                 message("Erro ao salvar prescricao") 
+                 
+               }
+
+                 
+               } else {
+                 save(logErro,file='logs/logErro.RData')
+                 message("Erro ao salvar prescricao") 
+                 
+               }
+               
+               
+             } else {
+               save(logErro,file='logs/logErro.RData')
+               message("Erro ao salvar prescricao") 
+               
+             }
+         
+     
+            
+          }
 
         
-      }
-      
-
-      
-      ## 99% dos casos retorna null
-      prescription <- getPrescriptionFromPatient(con.local = con_local,date.pickup =pickup_date ,patient.id =patien.id )
-      
-      if(nrow(prescription)==0){
-
-      
+      } else { # TODO ha prescricoes que tem mais de um medicamento
+        
       }
 
       
-      if(nrow(prescription)>0){
-        message(paste0( 'found on prescriptioin in rec: ', i))
-      }
       
       
     }

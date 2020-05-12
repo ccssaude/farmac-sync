@@ -19,7 +19,7 @@ getFarmacSyncTempDispense <- function(con.farmac, farmac.name) {
   sync_temp_dispense <- tryCatch({
 
     
-    sync_temp_dispense  <- dbGetQuery( con.farmac , paste0("select * from public.sync_temp_dispense
+    sync_temp_dispense  <- dbGetQuery( con.farmac , paste0("select * from sync_temp_dispense
                                                          where clinic_name_farmac ='", farmac.name, "' ;" )  )
     return(sync_temp_dispense)
     
@@ -99,7 +99,7 @@ getUsSyncTempDispense <- function(con.farmac, clinic.name) {
   sync_temp_dispense <- tryCatch({
     
     
-    temp_dispenses  <- dbGetQuery( con.farmac , paste0("select * from public.sync_temp_dispense where sync_temp_dispenseid = '" , clinic.name, "' ;" )  )
+    temp_dispenses  <- dbGetQuery( con.farmac , paste0("select * from sync_temp_dispense where sync_temp_dispenseid = '" , clinic.name, "' ;" )  )
     
     return(temp_dispenses)
     
@@ -178,7 +178,7 @@ getLocalSyncTempDispense <- function(con.local) {
   sync_temp_dispense <- tryCatch({
     
     
-    sync_temp_dispense  <- dbGetQuery( con.local , paste0("select * from public.sync_temp_dispense ;" )  )
+    sync_temp_dispense  <- dbGetQuery( con.local , paste0("select * from sync_temp_dispense ;" )  )
     return(sync_temp_dispense)
     
   },
@@ -240,14 +240,14 @@ sendDispenseToServer <- function(con_postgres ,df.dispenses ){
     
     # guardar o log 
     if(is.farmac){
-      saveLogError(us.name = main_clinic_name,
+      saveLogError(us.name = farmac_name,
                    event.date = as.character(Sys.time()),
                    action = ' sendDispenseToServer ->  Erro ao inserir as  dispensas dos pacientes da farmac para o servidor local ',
                    error = as.character(cond$message) )  
       
     } else {
       
-      saveLogError(us.name = farmac_name,
+      saveLogError(us.name = main_clinic_name ,
                    event.date = as.character(Sys.time()),
                    action = ' sendDispenseToServer ->  Erro ao enviar dispensas dos pacientes da farmac para o  Servidor Farmac ',
                    error = as.character(cond$message) )  
@@ -272,7 +272,7 @@ sendDispenseToServer <- function(con_postgres ,df.dispenses ){
       # guardar o log 
       if(is.farmac){
         # guardar o log 
-        saveLogError(us.name = main_clinic_name,
+        saveLogError(us.name = farmac_name ,
                      event.date = as.character(Sys.time()),
                      action = 'Warning  sendDispenseToServer -> Envia dispensas dos pacientes da farmac para o  Servidor Local  ',
                      error = as.character(cond$message) )  
@@ -280,7 +280,7 @@ sendDispenseToServer <- function(con_postgres ,df.dispenses ){
       } else {
         
         # guardar o log 
-        saveLogError(us.name = farmac_name,
+        saveLogError(us.name = main_clinic_name,
                      event.date = as.character(Sys.time()),
                      action = 'Warning  sendDispenseToServer -> Envia dispensas dos pacientes da farmac para o  Servidor Farmac  ',
                      error = as.character(cond$message) )  
@@ -329,7 +329,7 @@ getDispensesToSendOpenMRS <- function(con.local) {
   sync_temp_dispense <- tryCatch({
     
     
-    sync_temp_dispense  <- dbGetQuery( con.local , paste0( "select * from public.sync_temp_dispense where ( imported is null or imported ='' ) and sync_temp_dispenseid ='",main_clinic_name , "' ; ")   )
+    sync_temp_dispense  <- dbGetQuery( con.local , paste0( "select * from sync_temp_dispense where ( imported is null or imported ='' ) and sync_temp_dispenseid ='",main_clinic_name , "' ; ")   )
     return(sync_temp_dispense)
     
   },
@@ -405,7 +405,7 @@ saveNewPrescription <- function(con_postgres ,df.prescription ){
   # status (TRUE/FALSE)  envio com sucesso/ envio sem sucesso
   status <- tryCatch({
     
-    status_send <- dbWriteTable(con_postgres, "public.prescription", df.prescription, row.names=FALSE, append=TRUE)
+    status_send <- dbWriteTable(con_postgres, "prescription", df.prescription, row.names=FALSE, append=TRUE)
     
     ## se occorer algum erro , no envio esta parte nao vai executar
     status_send <- TRUE
@@ -419,14 +419,14 @@ saveNewPrescription <- function(con_postgres ,df.prescription ){
     
     # guardar o log 
     if(is.farmac){
-      saveLogError(us.name = main_clinic_name,
+      saveLogError(us.name = farmac_name ,
                    event.date = as.character(Sys.time()),
                    action = 'saveNewPrescription  -> salva uma nova  prescricao na BD ',
                    error = as.character(cond$message) )  
       
     } else {
       
-      saveLogError(us.name = farmac_name,
+      saveLogError(us.name = main_clinic_name,
                    event.date = as.character(Sys.time()),
                    action = ' saveNewPrescription  -> salva uma nova  prescricao na BD',
                    error = as.character(cond$message) )  
@@ -451,7 +451,7 @@ saveNewPrescription <- function(con_postgres ,df.prescription ){
       # guardar o log 
       if(is.farmac){
         # guardar o log 
-        saveLogError(us.name = main_clinic_name,
+        saveLogError(us.name =  farmac_name ,
                      event.date = as.character(Sys.time()),
                      action = 'Warning saveNewPrescription  -> salva uma nova  prescricao na BD',
                      error = as.character(cond$message) )  
@@ -459,7 +459,7 @@ saveNewPrescription <- function(con_postgres ,df.prescription ){
       } else {
         
         # guardar o log 
-        saveLogError(us.name = farmac_name,
+        saveLogError(us.name = main_clinic_name,
                      event.date = as.character(Sys.time()),
                      action = 'Warning  saveNewPrescription  -> salva uma nova  prescricao na BD  ',
                      error = as.character(cond$message) )  
@@ -489,6 +489,109 @@ saveNewPrescription <- function(con_postgres ,df.prescription ){
   
   return(status)
 }
+
+
+
+#' saveNewPrescribedDrug  -> salva uma nova  PrescribedDrug na BD
+#' 
+#' @param con_postgres  obejcto de conexao com BD
+#' @param df.prescribed.drug o datafrane com a prescricao nova
+#' @examples 
+#' 
+#' status <- saveNewPrescription(con_local,prescription)
+#TODO addicionar bloco de warnings no trycatch
+
+saveNewPrescribedDrug <- function(con_postgres ,df.prescribed.drug ){
+  
+  # status (TRUE/FALSE)  envio com sucesso/ envio sem sucesso
+  status <- tryCatch({
+    
+    status_send <- dbWriteTable(con_postgres, "prescribeddrugs", df.prescribed.drug, row.names=FALSE, append=TRUE)
+    
+    ## se occorer algum erro , no envio esta parte nao vai executar
+    status_send <- TRUE
+    return(status_send)
+  },
+  error = function(cond) {
+    
+    ## Coisas a fazer se occorre um erro 
+    # imprimir msg na consola
+    message(cond$message)
+    
+    # guardar o log 
+    if(is.farmac){
+      saveLogError(us.name = farmac_name ,
+                   event.date = as.character(Sys.time()),
+                   action = 'saveNewPrescribedDrug  -> salva uma nova  PrescribedDrug na BD',
+                   error = as.character(cond$message) )  
+      
+    } else {
+      
+      saveLogError(us.name = main_clinic_name,
+                   event.date = as.character(Sys.time()),
+                   action = ' saveNewPrescribedDrug  ->salva uma nova  PrescribedDrug na BD',
+                   error = as.character(cond$message) )  
+    }
+    
+    
+    #Choose a return value in case of error
+    return(FALSE)
+  },
+  warning = function(cond) {
+    
+    ## Coisas a fazer se ocorrer um erro 
+    
+    # imprimir msg na consola
+    message(cond$message)
+    
+    
+    # Se for um waring em que nao foi possivel buscar os dados guardar no log e return FALSE
+    if(grepl(pattern = 'Could not create execute',x = cond$message,ignore.case = TRUE)){
+      
+      
+      # guardar o log 
+      if(is.farmac){
+        # guardar o log 
+        saveLogError(us.name = farmac_name ,
+                     event.date = as.character(Sys.time()),
+                     action = 'Warning saveNewPrescribedDrug  -> salva uma nova  PrescribedDrug na BD',
+                     error = as.character(cond$message) )  
+        
+      } else {
+        
+        # guardar o log 
+        saveLogError(us.name = main_clinic_name,
+                     event.date = as.character(Sys.time()),
+                     action = 'Warning  saveNewPrescribedDrug  -> salva uma nova  PrescribedDrug na BD ',
+                     error = as.character(cond$message) )  
+      }
+      
+      
+      return(FALSE)
+      
+    } else {
+      
+      if (exists('status_send')){
+        
+        return(status_send)
+      } else {
+        
+        return(FALSE)
+      }
+      
+      
+    }
+  },
+  finally = {
+    # NOTE:
+    # Here goes everything that should be executed at the end,
+    # Do nothing
+  })
+  
+  return(status)
+}
+
+
 
 #' getPrescriptionFromPatient -> Busca a prescricao de  paciente
 #' 
