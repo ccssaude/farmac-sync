@@ -1425,10 +1425,9 @@ composePrescribedDrugs <- function(df.dispense, prescription.id, prescribed.drug
 #' df_prescruibed_drugs  <- composePrescribedDrugs(df.dispense, prescription.id, prescribed.drug.id)
 #' 
 
-composeAndSavePackage <- function(df.packagedruginfotmp, prescription.to.save) {
+composePackage <- function(df.packagedruginfotmp, prescription.to.save) {
 
   load(file = 'config/package.RData') 
-  load(file = 'config/packageddrugs.RData')
   
   id_package <- getLastPackageID(con_local)
   
@@ -1450,6 +1449,36 @@ composeAndSavePackage <- function(df.packagedruginfotmp, prescription.to.save) {
   )
 
 
+}
+
+#' composePackagedDrugs -> compoe um dataframe de um composePackagedDrug  para inserir 
+#'
+#' @param df.packagedruginfotmp  df dispensa do paciente
+#' @param package.to.save  package associado 
+#' @param packageddrugsindex index do packagedrug
+#' @return df composePackagedDrugs 
+#' @examples 
+#' df_packageddrugs  <- composePackagedDrugs(df.packagedruginfotmp, package.to.save, packageddrugsindex)
+#' 
+
+composePackagedDrugs <- function(df.packagedruginfotmp, package.to.save, packageddrugsindex ) {
+  
+  # carrega df vazio packageddrugs
+  load(file = 'config/packageddrugs.RData')
+  
+  id_pd <- getLastPackagedDrugsID(con_local)
+  id_pd <-  id_pd + (6)*sample(1:16, 1) + 17  # random id generation
+
+  
+  packageddrugs <<- add_row(packageddrugs,
+                            id = id_pd,
+                            amount = df.packagedruginfotmp$dispensedqty[1],
+                            parentpackage= package.to.save$id[1] ,
+                            stock=df.packagedruginfotmp$stockid[1],
+                            modified='T',
+                            packageddrugsindex = packageddrugsindex)
+  
+  
 }
 
 

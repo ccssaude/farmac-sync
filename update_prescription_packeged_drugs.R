@@ -102,32 +102,24 @@ if(!is.logical(dispenses_to_send_openmrs)){
                      
                   
                      # processa package, packagedrugs & packaagedruginfotmp
+                      # cria  packagedruginfotmp
                      composePackageDrugInfoTmp(all_patient_dispenses[j,] ,user_admin$id[1])
         
+                     # cria package
+                     composePackage(df.packagedruginfotmp = packagedruginfotmp,
+                                            prescription.to.save = prescription_to_save)
                      
-                     package_to_save <- composeAndSavePackage(df.packagedruginfotmp = packagedruginfotmp,
-                                                              prescription.to.save = prescription_to_save)
+                     # cria packageddrugs
+                     composePackagedDrugs(df.packagedruginfotmp = packagedruginfotmp,
+                                           package.to.save = package,
+                                           packageddrugsindex = 0)
                      
-                       load(file = 'config/packageddrugs.RData')
-                    
-               
-                       id_pd <- getLastPackagedDrugsID(con_local)
-                       id_pd <-  id_pd + (6)*sample(1:16, 1) + 17  # random id generation
-                       
-                       packageddrugsindex <- 0
-                       
-                       packageddrugs <<- add_row(packageddrugs,
-                                                 id = id_pd,
-                                                 amount = packagedruginfotmp$dispensedqty[1],
-                                                 parentpackage= package_to_save$id[1] ,
-                                                 stock=packagedruginfotmp$stockid[1],
-                                                 modified='T',
-                                                 packageddrugsindex = packageddrugsindex)
+                     # actualiza campos packageid & packageddrug no df packagedruginfotmp
+                      packagedruginfotmp$packageid[1]     <-  package$id[1]
+                      packagedruginfotmp$notes[1]         <- all_patient_dispenses[j,]$notes[1]
+                      packagedruginfotmp$packageddrug[1]  <- packageddrugs$id[1]
                        
                        
-                       packagedruginfotmp$packageid[1]     <-  package_to_save$id[1]
-                       packagedruginfotmp$notes[1]         <- all_patient_dispenses[j,]$notes[1]
-                       packagedruginfotmp$packageddrug[1]  <- id_pd
                        
                        status_p <-  savePackage(con_local, package )
                        if(status_p){
