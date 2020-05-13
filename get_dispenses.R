@@ -20,7 +20,7 @@ if(! is.logical(con_farmac) ){
     
     # get local dispenses
     sync_dispense_local <- getLocalSyncTempDispense(con_local )
-    user_admin <- getAdminUser(con_local)
+  
     # sync_dispense_local = FALSE para casos em que nao foi possivl buscar as dispensas (falha de rede,etc )
     if(! is.logical(sync_dispense_local)){
       

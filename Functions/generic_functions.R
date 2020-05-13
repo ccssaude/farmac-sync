@@ -1334,6 +1334,7 @@ composePrescription <- function(df.dispense,linha.id, regime.id,provider.id, pat
   precription <- add_row( precription,
                          clinicalstage      =0,
                          current            = 'T',
+                         weight             = 0,
                          date               = df.dispense$date[1],
                          doctor             =provider.id,
                          duration           =  df.dispense$duration[1],
@@ -1348,17 +1349,18 @@ composePrescription <- function(df.dispense,linha.id, regime.id,provider.id, pat
                          datainicionoutroservico = df.dispense$datainicionoutroservico[1],  
                          motivomudanca      = df.dispense$motivomudanca[1], 
                          linhaid            = linha.id,
+                         dispensatrimestral = df.dispense$dispensatrimestral[1],
                          ppe                = df.dispense$ppe[1],   
                          ptv                = df.dispense$ptv[1],  
                          tb                 = df.dispense$tb[1],  
                          tpi                = df.dispense$tpi[1],   
                          tpc                = df.dispense$tpc[1],
-                          gaac              = df.dispense$gaac[1], 
+                         gaac              = df.dispense$gaac[1], 
                          af                 = df.dispense$af[1],    
                          ca                 = df.dispense$ca[1],         
                          ccr                = df.dispense$ccr[1], 
                          saaj               = df.dispense$saaj[1],   
-                         fr                 =   df.dispense$fr[1] ,
+                         fr                 = df.dispense$fr[1] ,
                          id                 = prescription.id)
  
    
@@ -1379,13 +1381,16 @@ composePrescription <- function(df.dispense,linha.id, regime.id,provider.id, pat
 #' df_prescruibed_drugs  <- composePrescribedDrugs(df.dispense, prescription.id, prescribed.drug.id)
 #' 
 
-composePrescribedDrugs <- function(df.dispense, prescription.id, prescribed.drug.id) {
+composePrescribedDrugs <- function(df.dispense, prescription.id) {
   
   load('config/prescribeddrugs.RData')
-  # load(file = 'config/drugs.RData') 
-  # drugs <- dbGetQuery(con_local, 'select * from drug  ;')
-  
+ 
+  temp_prescribeddrugs <- prescribeddrugs
+    
   for(i in 1:nrow(df.dispense)){
+
+    prescribed_drug_id <- getLastPrescribedDrugID(con_local)
+    prescribed_drug_id <- prescribed_drug_id + sample(7:13, 1)*3 + 2*i ##  gerao aleatoria de ID apartir do ultimo
     
     drug_name <- df.dispense$drugname[i]
     drug <- getDrug(df.drugs =drugs,drug.name =drug_name)
@@ -1396,20 +1401,21 @@ composePrescribedDrugs <- function(df.dispense, prescription.id, prescribed.drug
       amt =1
     }
     prescribeddrugsindex = i -1
-    prescribeddrugs <<- add_row(prescribeddrugs,
+    
+    temp_prescribeddrugs <- add_row(temp_prescribeddrugs,
       amtpertime  =amt,
       drug = drug$id[1]  ,
       prescription = prescription.id,
       timesperday =df.dispense$timesperday[i],
       modified =  df.dispense$modified[i] ,
       prescribeddrugsindex = prescribeddrugsindex,
-      id = prescribed.drug.id
+      id = prescribed_drug_id
       )
     
-      
+   # temp_prescribeddrugs <- rbind.fill(prescribeddrugs,temp_prescribeddrugs )
   }
   
-  #prescribeddrugs
+  return(temp_prescribeddrugs)
   
 }
 
@@ -1422,33 +1428,45 @@ composePrescribedDrugs <- function(df.dispense, prescription.id, prescribed.drug
 #' @param prescribed.drug.id id por inserir na tabela
 #' @return NA 
 #' @examples 
-#' df_prescruibed_drugs  <- composePrescribedDrugs(df.dispense, prescription.id, prescribed.drug.id)
+#' df_prescruibed_drugs  <- composePackage(df.packagedruginfotmp, prescription.to.save)
 #' 
 
 composePackage <- function(df.packagedruginfotmp, prescription.to.save) {
-
-  load(file = 'config/package.RData') 
   
-  id_package <- getLastPackageID(con_local)
   
-  id_package <-  id_package + (3)*sample(1:9, 1) + 4  # random id generation
+  load(file = 'config/package.RData')
+  temp_package <- package
   
-   package <<- add_row(
-    package,
-    id = id_package,
-    pickupdate = prescription.to.save$date[1],
-    packdate =  prescription.to.save$date[1],
-    packageid = prescription.to.save$prescriptionid[1],
-    modified= 'T',
-    prescription =prescription.to.save$id[1],
-    clinic = 2, # warning, this is  hardcoded
-    weekssupply = df.packagedruginfotmp$weekssupply[1],
-    dateleft =prescription.to.save$date[1],
-    datereceived = prescription.to.save$date[1],
-    drugtypes = 'ARV'
-  )
+  for (v in 1:nrow(df.packagedruginfotmp)) {
+    id_package <- getLastPackageID(con_local)
+    id_package <-
+      id_package + 3*sample(3:9, 1) + 17  # random id generation
+    
+    temp_package <- add_row(
+      temp_package,
+      id = id_package,
+      dateleft = df.packagedruginfotmp$dispensedate[v],
+      datereceived = df.packagedruginfotmp$dispensedate[v],
+      modified = 'T',
+      packageid = prescription.to.save$prescriptionid[v],
+      packdate =  prescription.to.save$date[v],
+      pickupdate = df.packagedruginfotmp$dispensedate[v],
+      prescription = prescription.to.save$id[1],
+      clinic = 2,
+      # warning, this is  hardcoded
+      weekssupply = df.packagedruginfotmp$weekssupply[v],
+      drugtypes = 'ARV',
+      stockreturned = FALSE,
+      packagereturned = FALSE,
+      reasonforpackagereturn = '',
+      datereturned = NA
+    )
+    
+    
+}
 
-
+return(temp_package)
+  
 }
 
 #' composePackagedDrugs -> compoe um dataframe de um composePackagedDrug  para inserir 
@@ -1461,23 +1479,29 @@ composePackage <- function(df.packagedruginfotmp, prescription.to.save) {
 #' df_packageddrugs  <- composePackagedDrugs(df.packagedruginfotmp, package.to.save, packageddrugsindex)
 #' 
 
-composePackagedDrugs <- function(df.packagedruginfotmp, package.to.save, packageddrugsindex ) {
+composePackagedDrugs <- function(df.packagedruginfotmp, package.to.save ) {
   
   # carrega df vazio packageddrugs
   load(file = 'config/packageddrugs.RData')
+  temp_packageddrugs <- packageddrugs
   
-  id_pd <- getLastPackagedDrugsID(con_local)
-  id_pd <-  id_pd + (6)*sample(1:16, 1) + 17  # random id generation
-
-  
-  packageddrugs <<- add_row(packageddrugs,
+  for (v in 1:nrow(df.packagedruginfotmp)) {
+   
+    id_pd <- getLastPackagedDrugsID(con_local)
+    id_pd <-  id_pd + 6*sample(7:16, 1) + 26  # random id generation
+    packageddrugsindex <- v - 1
+    
+    temp_packageddrugs <- add_row(temp_packageddrugs,
                             id = id_pd,
-                            amount = df.packagedruginfotmp$dispensedqty[1],
-                            parentpackage= package.to.save$id[1] ,
-                            stock=df.packagedruginfotmp$stockid[1],
+                            amount = df.packagedruginfotmp$dispensedqty[v],
+                            parentpackage= package.to.save$id[v] ,
+                            stock=df.packagedruginfotmp$stockid[v],
                             modified='T',
                             packageddrugsindex = packageddrugsindex)
-  
+
+  }
+ 
+return(temp_packageddrugs)
   
 }
 
@@ -1495,46 +1519,53 @@ composePackagedDrugs <- function(df.packagedruginfotmp, package.to.save, package
 composePackageDrugInfoTmp <- function(df.patient.dispenses, user.id) {
   
   load(file = 'config/packagedruginfotmp.RData') 
+  temp_packagedruginfotmp <- packagedruginfotmp
   
-
+  for(i in 1:nrow(df.patient.dispenses)){
+  
     # para cada drug associar um stock
-    drug_name <- df.patient.dispenses$drugname[1]
+    drug_name <- df.patient.dispenses$drugname[i]
     drug <- getDrug(df.drugs = drugs,drug_name )
     stock <- getStockForDrug(con_local,drug$id[1])
     id <- getLastPackageDrugInfoTmpID(con_local)
-    id <- id + sample(1:9, 1)*(2*3)
+    id <- id + sample(7:17, 1)*(7) +i
     
-  packagedruginfotmp <<- add_row(
-    packagedruginfotmp,
-    id = id,
-    amountpertime = '0',
-    clinic = main_clinic_name,
-    dispensedqty = 0,
-    batchnumber = "",
-    formlanguage1 = "",
-    formlanguage2 = "",
-    formlanguage3 = "",
-    drugname = drug_name,
-    expirydate = df.patient.dispenses$expirydate[1],
-    patientid = df.patient.dispenses$patientid[1],
-    patientfirstname = df.patient.dispenses$patientfirstname[1],
-    patientlastname= df.patient.dispenses$patientlastname[1],
-    specialinstructions1 = "",
-    specialinstructions2 = "",
-    stockid = stock$id[1],
-    timesperday= df.patient.dispenses$timesperday[1],
-    numberoflabels =0,
-    cluser = user.id,
-    dispensedate = df.patient.dispenses$dispensedate[1],
-    weekssupply= df.patient.dispenses$weekssupply[1],
-    qtyinhand = df.patient.dispenses$qtyinhand[1],
-    summaryqtyinhand = df.patient.dispenses$summaryqtyinhand[1],
-    qtyinlastbatch = df.patient.dispenses$qtyinlastbatch[1],
-    prescriptionduration = df.patient.dispenses$duration[1],
-    dateexpectedstring = df.patient.dispenses$dateexpectedstring[1],
-    pickupdate = df.patient.dispenses$pickupdate[1],
-    notes = ""
-)
+    temp_packagedruginfotmp <- add_row(
+      temp_packagedruginfotmp,
+      id = id,
+      amountpertime = '0',
+      clinic = main_clinic_name,
+      dispensedqty = 0,
+      batchnumber = "",
+      formlanguage1 = "",
+      formlanguage2 = "",
+      formlanguage3 = "",
+      drugname = drug_name,
+      expirydate = df.patient.dispenses$expirydate[i],
+      patientid = df.patient.dispenses$patientid[i],
+      patientfirstname = df.patient.dispenses$patientfirstname[i],
+      patientlastname= df.patient.dispenses$patientlastname[i],
+      specialinstructions1 = "",
+      specialinstructions2 = "",
+      stockid = stock$id[1],
+      timesperday= df.patient.dispenses$timesperday[i],
+      numberoflabels =0,
+      cluser = user.id,
+      dispensedate = df.patient.dispenses$dispensedate[i],
+      weekssupply= df.patient.dispenses$weekssupply[i],
+      qtyinhand = df.patient.dispenses$qtyinhand[i],
+      summaryqtyinhand = df.patient.dispenses$summaryqtyinhand[i],
+      qtyinlastbatch = df.patient.dispenses$qtyinlastbatch[i],
+      prescriptionduration = df.patient.dispenses$duration[i],
+      dateexpectedstring = df.patient.dispenses$dateexpectedstring[i],
+      pickupdate = df.patient.dispenses$pickupdate[i],
+      notes = ""
+    )
+    
+
+  }
+  
+  return(temp_packagedruginfotmp)
 
 }
 
