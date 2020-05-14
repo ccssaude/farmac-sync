@@ -1390,7 +1390,7 @@ composePrescribedDrugs <- function(df.dispense, prescription.id) {
   for(i in 1:nrow(df.dispense)){
 
     prescribed_drug_id <- getLastPrescribedDrugID(con_local)
-    prescribed_drug_id <- prescribed_drug_id + sample(7:13, 1)*3 + 2*i ##  gerao aleatoria de ID apartir do ultimo
+    prescribed_drug_id <- prescribed_drug_id + sample(7:23, 1)*3 + 2*i ##  gerao aleatoria de ID apartir do ultimo
     
     drug_name <- df.dispense$drugname[i]
     drug <- getDrug(df.drugs =drugs,drug.name =drug_name)
@@ -1440,7 +1440,7 @@ composePackage <- function(df.packagedruginfotmp, prescription.to.save) {
   for (v in 1:nrow(df.packagedruginfotmp)) {
     id_package <- getLastPackageID(con_local)
     id_package <-
-      id_package + 3*sample(3:9, 1) + 17  # random id generation
+      id_package + 3*sample(11:19, 1) + 17*v  # random id generation
     
     temp_package <- add_row(
       temp_package,
@@ -1488,7 +1488,7 @@ composePackagedDrugs <- function(df.packagedruginfotmp, package.to.save ) {
   for (v in 1:nrow(df.packagedruginfotmp)) {
    
     id_pd <- getLastPackagedDrugsID(con_local)
-    id_pd <-  id_pd + 6*sample(7:16, 1) + 26  # random id generation
+    id_pd <-  id_pd + 6*sample(11:16, 1) + 26*v  # random id generation
     packageddrugsindex <- v - 1
     
     temp_packageddrugs <- add_row(temp_packageddrugs,
@@ -1528,7 +1528,7 @@ composePackageDrugInfoTmp <- function(df.patient.dispenses, user.id) {
     drug <- getDrug(df.drugs = drugs,drug_name )
     stock <- getStockForDrug(con_local,drug$id[1])
     id <- getLastPackageDrugInfoTmpID(con_local)
-    id <- id + sample(7:17, 1)*(7) +i
+    id <- id + sample(7:17, 1)*7 +i
     
     temp_packagedruginfotmp <- add_row(
       temp_packagedruginfotmp,

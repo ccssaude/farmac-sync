@@ -20,7 +20,7 @@ if(!is.logical(con_local)){
     
     # pacientes do iDART para buscar o iD
     tmp_patients <- getPatientInfo(con_local)
-    no_dups_dispenses <- distinct(dispenses_to_send_openmrs,as.Date(dispensedate), drugname, .keep_all = TRUE )
+    no_dups_dispenses <- distinct(dispenses_to_send_openmrs,as.Date(dispensedate), drugname, patientid , .keep_all = TRUE )
     no_dups_dispenses$'as.Date(dispensedate)' <- NULL
   
     all_patient_nids <- unique(no_dups_dispenses$patientid)
@@ -140,10 +140,10 @@ if(!is.logical(con_local)){
                              
                              ## actualizar sync_temp dispense
                           
-                                dispense_date <- as.Date(packagedruginfotmp_to_save$dispensedate[1])
+                                dispense_date <- as.Date(packagedruginfotmp_to_save[1,]$dispensedate[1])
 
-                                 vec_id <- dispenses_to_send_openmrs$id[ 
-                                  which( as.Date(dispenses_to_send_openmrs$dispensedate) ==dispense_date )]
+                                 vec_id <- all_patient_dispenses[j,]$id[ 
+                                  which( as.Date(all_patient_dispenses[j,]$dispensedate) ==dispense_date )]
                                  
                                if(length(vec_id)>1){
                                  
@@ -240,8 +240,40 @@ if(!is.logical(con_local)){
           dt_date <- as.Date(dt_date)
           next_dt_date <- dt_date %m+% months(3)
           
+          df_transicoes_dt <- subset(patient_dispenses,  as.Date(dispensedate) > dt_date &  as.Date(dispensedate) < next_dt_date ,)
+          ## actualizar sync_temp dispense
+          for (t in 1:nrow(df_transicoes_dt)) {
+            
+            dispense_date <- as.Date(df_transicoes_dt$dispensedate[t])
+            
+            
+            vec_id <- df_transicoes_dt$id[ 
+              which( as.Date(df_transicoes_dt$dispensedate) ==dispense_date )]
+            
+            if(length(vec_id)>1){
+              
+              for (k in 1:length(vec_id)) {
+                
+                id <- vec_id[k]
+                sql_query <- paste0( "update sync_temp_dispense set imported = 'yes' where id = ",id, " ;" )
+                print(sql_query)
+                dbSendQuery(con_local,sql_query )
+              }
+              
+              
+            } else {
+              sql_query <- paste0( "update sync_temp_dispense set imported = 'yes' where id = ",vec_id[1], " ;" )
+              print(sql_query)
+              dbSendQuery(con_local,sql_query )
+              
+            }
+            
+            
+          }
           
           patient_dispenses <- subset(patient_dispenses, ! as.Date(dispensedate) > dt_date &  as.Date(dispensedate) < next_dt_date ,)
+          
+          
         }
         
          vec_dates  <- sort( unique(as.Date(patient_dispenses$dispensedate)) )
@@ -354,8 +386,8 @@ if(!is.logical(con_local)){
                                 dispense_date <- as.Date(packagedruginfotmp_to_save$dispensedate[t])
                                
                                 
-                                vec_id <- dispenses_to_send_openmrs$id[ 
-                                  which( as.Date(dispenses_to_send_openmrs$dispensedate) ==dispense_date )]
+                                vec_id <- patient_dispense$id[ 
+                                  which( as.Date(patient_dispense$dispensedate) ==dispense_date )]
                                 
                                 if(length(vec_id)>1){
                                   
@@ -478,8 +510,8 @@ if(!is.logical(con_local)){
                             
                             dispense_date <- as.Date(packagedruginfotmp_to_save$dispensedate[1])
                             
-                            vec_id <- dispenses_to_send_openmrs$id[ 
-                              which( as.Date(dispenses_to_send_openmrs$dispensedate) ==dispense_date )]
+                            vec_id <- patient_dispense$id[ 
+                              which( as.Date(patient_dispense$dispensedate) ==dispense_date )]
                             
                             if(length(vec_id)>1){
                               
