@@ -116,7 +116,20 @@ getLocalServerCon <- function(){
                     local.postgres.host, '  db:',local.postgres.db.name,
                     "...",'user:',local.postgres.user,
                     ' passwd: ', local.postgres.password)) 
-    message(cond)
+    # guardar o log 
+    # if(is.farmac){
+    #   saveLogError(us.name = farmac_name,
+    #                event.date = as.character(Sys.time()),
+    #                action = 'getLocalServerCon  ->  Estabelece uma conexao com o PostgreSQL Local ',
+    #                error = as.character(cond$message) )  
+    #   
+    # } else {
+    #   
+    #   saveLogError(us.name = main_clinic_name ,
+    #                event.date = as.character(Sys.time()),
+    #                action = 'getLocalServerCon  ->  Estabelece uma conexao com o PostgreSQL Local',
+    #                error = as.character(cond$message) )  
+    #}
     
     
  
@@ -152,7 +165,7 @@ getLocalServerCon <- function(){
 saveLogError <- function (us.name, event.date, action, error){
   
   # insere a linha de erro no log
-  logErro  <<-  add_row(logErro,us = us.name, data_evento =event.date, accao =action, Erro= error)
+  logErro  <<-  add_row(logErro,us = us.name, data_evento =event.date, accao =action, erro= error)
   
 }
 
@@ -690,13 +703,24 @@ getLogDispenseFromServer <- function(con.farmac, clinic.name) {
     
     # imprimir msg na consola
     message(cond$message)
-    
     # guardar o log 
-    saveLogError(us.name = clinic.name,
-                 event.date = as.character(Sys.time()),
-                 action = ' getLogDispenseFromServer -> Busca os logs  de dispensa envio/receber de uma det. US',
-                 error = as.character(cond$message) )  
+    if(is.farmac){
+      saveLogError(us.name =farmac_name ,
+                   event.date = as.character(Sys.time()),
+                   action = ' getLogDispenseFromServer -> Busca os logs  de dispensa envio/receber de uma det. US',
+                   error = as.character(cond$message) )  
+      
+    } else {
+      
+      # guardar o log 
+      saveLogError(us.name = clinic.name,
+                   event.date = as.character(Sys.time()),
+                   action = ' getLogDispenseFromServer -> Busca os logs  de dispensa envio/receber de uma det. US',
+                   error = as.character(cond$message) )  
+      
+    }
     
+
     #Choose a return value in case of error
     return(FALSE)
   },
@@ -758,7 +782,7 @@ getLogDispenseFromServer <- function(con.farmac, clinic.name) {
 #' @return tabela/dataframe/df com todas dispensas da tabela sync_temp_dispensas de determinada US
 #' @examples 
 #' clinic_name <- 'CS BAGAMOIO'
-#' con_farmac <- getFarmacServerCon()
+#' con_farmac <- getLogErrorFromServer()
 #' farmac_log_dispense <- getLogErrorFromServer(con_farmac,clinic_name)
 #' 
 
@@ -768,7 +792,7 @@ getLogErrorFromServer <- function(con.farmac, clinic.name) {
   log_errors <- tryCatch({
     
     
-    temp_logs <- dbGetQuery( con.farmac , paste0("SELECT  us, data_evento, accao, erro FROM logerro where us = ''", clinic.name, "' ;" )  )
+    temp_logs <- dbGetQuery( con.farmac , paste0("SELECT  us, data_evento, accao, erro FROM logerro where us = '", clinic.name, "' ;" )  )
     
     return(temp_logs)
     
@@ -780,11 +804,22 @@ getLogErrorFromServer <- function(con.farmac, clinic.name) {
     # imprimir msg na consola
     message(cond$message)
     
-    # guardar o log 
-    saveLogError(us.name = clinic.name,
-                 event.date = as.character(Sys.time()),
-                 action = ' getLogErrorFromServer -> Busca os logs de erro de uma det. US ',
-                 error = as.character(cond$message) )  
+    if(is.farmac){
+      saveLogError(us.name =farmac_name ,
+                   event.date = as.character(Sys.time()),
+                   action = ' getLogErrorFromServer -> Busca os logs de erro de uma det. US ',
+                   error = as.character(cond$message) )  
+      
+    } else {
+      
+      # guardar o log 
+      saveLogError(us.name = clinic.name,
+                   event.date = as.character(Sys.time()),
+                   action = ' getLogErrorFromServer -> Busca os logs de erro de uma det. US ',
+                   error = as.character(cond$message) )  
+    }
+    
+
     
     #Choose a return value in case of error
     return(FALSE)
@@ -796,22 +831,26 @@ getLogErrorFromServer <- function(con.farmac, clinic.name) {
     # imprimir msg na consola
     message(cond$message)
     
-    # guardar o log 
-    saveLogError(us.name = clinic.name,
-                 event.date = as.character(Sys.time()),
-                 action = ' getLogErrorFromServer -> Busca os logs de erro de uma det. US',
-                 error = as.character(cond$message) )  
-    
+
     
     # Se for um waring em que nao foi possivel buscar os dados guardar no log e return FALSE
     if(grepl(pattern = 'Could not create execute',x = cond$message,ignore.case = TRUE)){
       
       # guardar o log 
-      saveLogError(us.name = clinic.name,
-                   event.date = as.character(Sys.time()),
-                   action = 'getLogErrorFromServer -> Busca os logs de erro de uma det. US  ',
-                   error = as.character(cond$message) )  
-      
+      if(is.farmac){
+        saveLogError(us.name =farmac_name ,
+                     event.date = as.character(Sys.time()),
+                     action = ' getLogErrorFromServer -> Busca os logs de erro de uma det. US ',
+                     error = as.character(cond$message) )  
+        
+      } else {
+        
+        # guardar o log 
+        saveLogError(us.name = clinic.name,
+                     event.date = as.character(Sys.time()),
+                     action = ' getLogErrorFromServer -> Busca os logs de erro de uma det. US ',
+                     error = as.character(cond$message) )  
+      }
       return(FALSE)
       
     } else {
@@ -831,7 +870,7 @@ getLogErrorFromServer <- function(con.farmac, clinic.name) {
     # Do nothing
   })
   
-  log_dispenses
+  log_errors
   
   
 }
@@ -1390,7 +1429,7 @@ composePrescribedDrugs <- function(df.dispense, prescription.id) {
   for(i in 1:nrow(df.dispense)){
 
     prescribed_drug_id <- getLastPrescribedDrugID(con_local)
-    prescribed_drug_id <- prescribed_drug_id + sample(7:13, 1)*3 + 2*i ##  gerao aleatoria de ID apartir do ultimo
+    prescribed_drug_id <- prescribed_drug_id + sample(7:23, 1)*3 + 2*i ##  gerao aleatoria de ID apartir do ultimo
     
     drug_name <- df.dispense$drugname[i]
     drug <- getDrug(df.drugs =drugs,drug.name =drug_name)
@@ -1440,7 +1479,7 @@ composePackage <- function(df.packagedruginfotmp, prescription.to.save) {
   for (v in 1:nrow(df.packagedruginfotmp)) {
     id_package <- getLastPackageID(con_local)
     id_package <-
-      id_package + 3*sample(3:9, 1) + 17  # random id generation
+      id_package + 3*sample(11:19, 1) + 17*v  # random id generation
     
     temp_package <- add_row(
       temp_package,
@@ -1488,7 +1527,7 @@ composePackagedDrugs <- function(df.packagedruginfotmp, package.to.save ) {
   for (v in 1:nrow(df.packagedruginfotmp)) {
    
     id_pd <- getLastPackagedDrugsID(con_local)
-    id_pd <-  id_pd + 6*sample(7:16, 1) + 26  # random id generation
+    id_pd <-  id_pd + 6*sample(11:16, 1) + 26*v  # random id generation
     packageddrugsindex <- v - 1
     
     temp_packageddrugs <- add_row(temp_packageddrugs,
@@ -1528,7 +1567,7 @@ composePackageDrugInfoTmp <- function(df.patient.dispenses, user.id) {
     drug <- getDrug(df.drugs = drugs,drug_name )
     stock <- getStockForDrug(con_local,drug$id[1])
     id <- getLastPackageDrugInfoTmpID(con_local)
-    id <- id + sample(7:17, 1)*(7) +i
+    id <- id + sample(7:17, 1)*7 +i
     
     temp_packagedruginfotmp <- add_row(
       temp_packagedruginfotmp,
