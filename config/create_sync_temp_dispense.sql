@@ -5,7 +5,6 @@ alter  TABLE public.sync_temp_dispense add column imported   character varying(2
 
 
 -- Alteracoes FARMAC SERVER
-
 alter  TABLE public.sync_temp_patients add column imported   character varying(255) default null;
 alter  TABLE public.sync_temp_dispense add column imported   character varying(255) default null;
  

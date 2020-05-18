@@ -16,7 +16,11 @@ if(!is.logical(con_local)){
   
   dispenses_to_send_openmrs <- getDispensesToSendOpenMRS(con_local)
   
+  
   if (nrow(dispenses_to_send_openmrs)> 0){
+    
+    # comecar a inserir da dispensa menos actualizada ate a ultima
+    dispenses_to_send_openmrs <- dispenses_to_send_openmrs %>% arrange(patientid,desc(pickupdate)) 
     
     # pacientes do iDART para buscar o iD
     tmp_patients <- getPatientInfo(con_local)
@@ -30,6 +34,8 @@ if(!is.logical(con_local)){
       
       nid <- all_patient_nids[i]
       all_patient_dispenses <- no_dups_dispenses[which(no_dups_dispenses$patientid==nid),]
+   
+      
       all_patient_dispenses_dups <- all_patient_dispenses[duplicated(as.Date(all_patient_dispenses$dispensedate)),]
       drugs    <- dbGetQuery(con_local, 'select * from drug  ;')
       regimes  <- dbGetQuery(con_local, 'select * from regimeterapeutico where active=TRUE ;')

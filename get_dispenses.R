@@ -1,3 +1,4 @@
+########################################################### 
 
 # Limpar o envinronment & inicializar as 
 
@@ -6,7 +7,7 @@ rm(list=setdiff(ls(), c("wd", "is.farmac") ))
 source('config/config_properties.R')     
 
 
-#####################################################################################################
+########################################################### 
 
 
 # con_farmac = FALSE para casos de conexao nao estabelecida
@@ -110,7 +111,7 @@ if(! is.logical(con_farmac) ){
                     } else {
                       
                       
-                     log_dispenses_to_send <- anti_join(log_dispensas,log_farmac_dispenses,  by=c('paciente','data_levantamento'))
+                     log_dispenses_to_send <- anti_join( log_dispensas,log_farmac_dispenses,  by=c('paciente','data_levantamento'))
                      if(nrow(log_dispenses_to_send)>0 ){
                        status <- sendLogDispense(con_postgres = con_farmac,df.logdispense = log_dispenses_to_send)
                        
@@ -303,3 +304,4 @@ if(! is.logical(con_farmac) ){
   
 }
 
+########################################################### 
