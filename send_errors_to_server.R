@@ -28,9 +28,9 @@ if (!is.logical(con_farmac)) {
       if (nrow(log_error_server) == 0) {
         if (nrow(logErro) == 0) {
           if (is.farmac) {
-            message(paste0(farmac_name, ' - sem logs por enviar.'))
+            message(paste0( farmac_name, ' - sem logs por enviar.'))
           } else{
-            message(paste0(main_clinic_name, ' - sem logs por enviar.'))
+            message(paste0( main_clinic_name, ' - sem logs por enviar.'))
           }
           
           

@@ -1303,16 +1303,27 @@ getPatientId <- function(df.temp.patients,patient) {
          
          id <- pat$id[1]
          
-         if(is.farmac){
+         if(pat$uuid[1]==pat$uuid[2]){
            
-           saveLogError( us.name = farmac_name,    event.date =as.character(Sys.Date()),
-                         action = 'getPatientId -> Busca o id do paciente',
-                         error =  paste0('ERR_DUP Paciente FARMAC duplicado - ',pat$patientid[1])      )
-         } else {
-           saveLogError( us.name = main_clinic_name,    event.date = as.character(Sys.Date()),
-                         action = 'getPatientId -> Busca o id do paciente',
-                         error =  paste0('ERR_DUP Paciente FARMAC duplicado - ',pat$patientid[1])      )
+           # historico clinico de pacientes : Novo Paciente   ->  Referido para outra Farmacia  ->  Voltou da Referencia 
+          
+         } else {  # sao pacientes duplicados
+           
+           if(is.farmac){
+             
+             saveLogError( us.name = farmac_name,    event.date =as.character(Sys.Date()),
+                           action = 'getPatientId -> Busca o id do paciente',
+                           error =  paste0('ERR_DUP Paciente FARMAC duplicado - ',pat$patientid[1])      )
+           } else {
+             saveLogError( us.name = main_clinic_name,    event.date = as.character(Sys.Date()),
+                           action = 'getPatientId -> Busca o id do paciente',
+                           error =  paste0('ERR_DUP Paciente FARMAC duplicado - ',pat$patientid[1])      )
+           }
+           
+           
+           
          }
+
          
          return(id)
          

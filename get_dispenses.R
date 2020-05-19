@@ -47,8 +47,8 @@ if(! is.logical(con_farmac) ){
             sync_dispense_local <- sync_dispense_local[ , -which( names(sync_dispense_local) %in% c("imported"))]
             
             
-            dispenses_to_get <-  anti_join(sync_dispense_farmac, sync_dispense_local,   by=c('id','clinic_name_farmac') )
-            
+           # dispenses_to_get <-  anti_join(sync_dispense_farmac, sync_dispense_local,   by=c('id','clinic_name_farmac') )
+            dispenses_to_get <-  anti_join(sync_dispense_farmac, sync_dispense_local,   by=c('id') )
             if(nrow(dispenses_to_get) > 0){
               
               # status (TRUE/FALSE)  envio com sucesso/ envio sem sucesso
