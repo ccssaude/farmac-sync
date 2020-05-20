@@ -4,8 +4,6 @@ alter  TABLE public.sync_temp_dispense add column  clinic_name_farmac character 
 alter  TABLE public.sync_temp_dispense add column imported   character varying(255) default null;
 ALTER TABLE public.sync_temp_dispense  DROP CONSTRAINT IF EXISTS sync_temp_dispense_pkey;
 
--- evita trazer registos duplicados a primeira vez
--- update public.sync_temp_dispense  set clinic_name_farmac='Farmacia Magoanine'
 
 
 -- Alteracoes FARMAC SERVER
