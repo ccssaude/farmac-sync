@@ -9,10 +9,11 @@ source('config/config_properties.R')
 
 # buscar todas dispensas para actualziar aquelas que ja foram inseridas no openmrs
 
-dispenses_to_send_openmrs <-     # get local dispenses
-  sync_dispense_local <- getLocalSyncTempDispense(con_local )
+    # get local dispenses
+  dispenses_to_send_openmrs <- getLocalSyncTempDispense(con_local )
+  dispenses_to_send_openmrs <- dispenses_to_send_openmrs[which(dispenses_to_send_openmrs$sync_temp_dispenseid =="CS ALBASINE"),]
 
-
+  
 ########################################################### 
 
 ##  actualiza todas sync_temp_dispense que ja foram inseridas na BD de modo a evitar duplicacoes de packages

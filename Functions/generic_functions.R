@@ -796,7 +796,7 @@ getLogErrorFromServer <- function(con.farmac, clinic.name) {
   log_errors <- tryCatch({
     
     
-    temp_logs <- dbGetQuery( con.farmac , paste0("SELECT  us, data_evento, accao, erro FROM logerro where us = '", clinic.name, "' ;" )  )
+    temp_logs <- dbGetQuery( con.farmac , paste0("SELECT  us, data_evento, accao, erro FROM  public.logerro where us = '", clinic.name, "' ;" )  )
     
     return(temp_logs)
     
@@ -1934,6 +1934,7 @@ composePackageDrugInfoTmpOpenMRS <- function(df.patient.dispenses, user.id, regi
                    action = 'sendFilaOpenMRS',
                    error = paste0("Erro ao enviar fila do paciente: nid",df.patient[1], " - uuid:",df.patient[4] ))
       save(logErro,file = 'logs/logErro.RData')
+      print(as.character(r$error$message))
       return(FALSE)
     }
 

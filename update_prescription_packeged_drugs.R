@@ -12,11 +12,17 @@ source('config/config_properties.R')
 if(!is.logical(con_local)){
   # busca todas dispensas nao evniadas para openmrs : imported =''
   
+  # eliminar as transicoes
+  today = Sys.Date() # heihei
+  dbExecute(con_local, paste0(" delete from sync_temp_dispense where dispensedate::date > '" ,today , "' ;"))
+  
   dispenses_to_send_openmrs <- getDispensesToUpdateIdart(con_local)
   
   
   if (nrow(dispenses_to_send_openmrs)> 0){
     
+    
+  
     # comecar a inserir da dispensa menos actualizada ate a ultima
     dispenses_to_send_openmrs <- dispenses_to_send_openmrs %>% arrange(patientid,desc(pickupdate)) 
     
