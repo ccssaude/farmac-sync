@@ -406,7 +406,7 @@ getDispensesToSendOpenMRS <- function(con.local) {
     
     
     sync_temp_dispense  <- dbGetQuery( con.local , paste0( "select * from sync_temp_dispense where ( openmrs_status is null or openmrs_status ='' )
-                                                           and imported = 'yes' and sync_temp_dispenseid ='",main_clinic_name , "' ; ")   )
+                                                           and imported = 'yes'  and send_openmrs = 'yes' and sync_temp_dispenseid ='",main_clinic_name , "' ; ")   )
     return(sync_temp_dispense)
     
   },

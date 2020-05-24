@@ -7,94 +7,21 @@ wd <- '~/Git/farmac-sync/'
 
 
 # Set to TRUE/FALSE
-is.farmac <- FALSE                                    # definir se o codigo vai executar na farmac ou nao
+is.farmac <- TRUE                                    # definir se o codigo vai executar na farmac ou nao
 
 
 farmac.postgres.user ='farmac'                         # ******** modificar
 farmac.postgres.password='iD@rt2020'                   # ******** modificar
 farmac.postgres.db.name='pharm'                        # ******** modificar
-farmac.postgres.host='mail.ccsaude.org.mz'             # ******** modificar
+farmac.postgres.host='197.249.6.156'             # ******** modificar
 farmac.postgres.port=5455                              # ******** modificar
 
 
 local.postgres.user ='postgres'                         # ******** modificar
 local.postgres.password='postgres'                      # ******** modificar
-local.postgres.db.name='albazine'                          # ******** modificar
+local.postgres.db.name='farmac_magoanine'                          # ******** modificar
 local.postgres.host='172.18.0.3'                        # ******** modificar
 local.postgres.port=5432                                # ******** modificar
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

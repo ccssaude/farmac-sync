@@ -1,10 +1,10 @@
 library(lubridate)
 library(RMySQL)
-# Limpar o envinronment & inicializar as 
+# Limpar o envinronment & inicializar as
 
 rm(list=setdiff(ls(), c("wd", "is.farmac") ))
 
-source('config/config_properties.R')     
+source('config/config_properties.R')
 
 source(file = 'Functions/generic_functions.R')
 #####################################################################################################
@@ -24,7 +24,7 @@ if(!is.logical(con_openmrs)){
 if(!is.logical(con_local)){
   
 
-  # busca todas dispensas nao evniadas para openmrs : imported =''
+  # busca todas dispensas nao enviadas para openmrs : imported =''
   
   dispenses_to_send_openmrs <- getDispensesToSendOpenMRS(con_local)
   

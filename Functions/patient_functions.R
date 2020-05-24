@@ -1,44 +1,152 @@
 
+library(dplyr)
 
-#' getFarmacSyncTempPatients -> Busca pacientes de uma det. US na tabela sync_temp_patient 
-#' no servidor FARMAC PosgreSQL 
+#' insertPatient -> insere pacientes na tabela patient
 #' 
-#' @param con.farmac  obejcto de conexao com BD iDART
-#' @param main.clinic.name nome da us 
-#' @return tabela/dataframe/df com todos pacientes da tabela sync_temp_pacientes de determinada US
+#' @param con.postgres  obejcto de conexao com BD iDART
+#' @param df.patients informacao dos pacientes (accountstatus, cellphone, dateofbirth, clinic, firstnames, homephone, lastname, modified, patientid, province, sex, workphone, address1, address2, address3, nextofkinname, nextofkinphone, race, uuid, uuidopenmrs)
+#' @return TRUE/FALSE
 #' @examples 
-#' main.clinic.name <- 'CS Albazine'
-#' con_farmac <- getFarmacServerCon()
-#' farmac_temp_sync_patients <- getFarmacSyncTempPatients(con_farmac,main.clinic.name)
 #' 
+#' 
+insertPatient <- function(con.postgres,df.patients){
+  
+  # 
+  # base_query = " INSERT INTO public.patient(accountstatus, cellphone, dateofbirth, clinic, firstnames, homephone, lastname, modified, patientid, province, sex, workphone, address1, address2, address3, nextofkinname, nextofkinphone, race, uuid, uuidopenmrs)
+  # VALUES ( " 
+  # 
+  # insert_query = paste0(base_query,string_values ," ;")
+  # 
+  
+  status <- tryCatch({
+    
+    
+    status = dbWriteTable(con.postgres, "patient", df.patients ,append=TRUE, row.names=FALSE)
+    
+    return(status)
+  },
+  error = function(cond) {
+    
+    ## Coisas a fazer se ocorrer um erro 
+    
+    # imprimir msg na consola
+    message(cond$message)
+    
+    # guardar o log 
+    saveLogError(us.name = farmac_name,
+                 event.date = as.character(Sys.time()),
+                 action = 'insertPatient -> insere pacientes na tabela patient ',
+                 error = as.character(cond$message) )  
+    
+    #Choose a return value in case of error
+    return(FALSE)
+  },
+  finally = {
+    # NOTE:
+    # Here goes everything that should be executed at the end,
+    # Do nothing
+  })
+  
+  
+  status
 
-getFarmacSyncTempPatients <- function(con.farmac, main.clinic.name) {
+}
+
+#' insertPatientIdentifier -> insere pacientes na tabela PatientIdentifier 
+#' 
+#' @param con.postgres  obejcto de conexao com BD iDART
+#' @param df.patientidentifier informacao dos pacientes (accountstatus, cellphone, dateofbirth, clinic, firstnames, homephone, lastname, modified, patientid, province, sex, workphone, address1, address2, address3, nextofkinname, nextofkinphone, race, uuid, uuidopenmrs)
+#' @return TRUE/FALSE
+#' @examples 
+#' 
+#' 
+insertPatientIdentifier <- function(con.postgres,df.patientidentifier){
   
   
-  farmac_sync_temp_patients  <- dbGetQuery( con.farmac , paste0("select * from public.sync_temp_patients  where mainclinicname ='", main.clinic.name, "' ;" )  )
+  status <- tryCatch({
+    
+    
+    status = dbWriteTable(con.postgres, "patientidentifier", df.patients ,append=TRUE, row.names=FALSE)
+    
+    return(status)
+  },
+  error = function(cond) {
+    
+    ## Coisas a fazer se ocorrer um erro 
+    
+    # imprimir msg na consola
+    message(cond$message)
+    
+    # guardar o log 
+    saveLogError(us.name = farmac_name,
+                 event.date = as.character(Sys.time()),
+                 action = 'insertPatientIdentifier -> insere pacientes na tabela patientidentifier ',
+                 error = as.character(cond$message) )  
+    
+    #Choose a return value in case of error
+    return(FALSE)
+  },
+  finally = {
+    # NOTE:
+    # Here goes everything that should be executed at the end,
+    # Do nothing
+  })
   
-  return(farmac_sync_temp_patients)
+  
+  status
+  
+  
+  
+  
   
 }
 
-#' getLocalSyncTempPatients -> Busca pacientes de uma det. US  na tabela sync_temp_patient 
-#' no servidor Local PosgreSQL 
-#' 
-#' @param con.local  obejcto de conexao com BD iDART
-#' @param main.clinic.name nome da us 
-#' @return tabela/dataframe/df com todos pacientes da tabela sync_temp_pacientes da US
-#' @examples 
-#' main.clinic.name <- 'CS Albazine'
-#' con_local <- getLocalServerCon()
-#' sync_patients_farmac <- getLocalSyncTempPatients(con_local,main.clinic.name)
-#' 
 
-getLocalSyncTempPatients <- function(con.local, main.clinic.name) {
+#' insertPatientAttribute -> insere data inicio tarv tabela PatientAttribute 
+#' 
+#' @param con.postgres  obejcto de conexao com BD iDART
+#' @param df.patientattribute informacao dos pacientes (accountstatus, cellphone, dateofbirth, clinic, firstnames, homephone, lastname, modified, patientid, province, sex, workphone, address1, address2, address3, nextofkinname, nextofkinphone, race, uuid, uuidopenmrs)
+#' @return TRUE/FALSE
+#' @examples 
+#' 
+#' 
+insertPatientAttribute <- function(con.postgres,df.patientattribute){
+  
+  status <- tryCatch({
+    
+    
+    status = dbWriteTable(con.postgres, "patientattribute", df.patients ,append=TRUE, row.names=FALSE)
+    
+    return(status)
+  },
+  error = function(cond) {
+    
+    ## Coisas a fazer se ocorrer um erro 
+    
+    # imprimir msg na consola
+    message(cond$message)
+    
+    # guardar o log 
+    saveLogError(us.name = farmac_name,
+                 event.date = as.character(Sys.time()),
+                 action = 'insertPatientAttribute -> insere pacientes na tabela patientatribute ',
+                 error = as.character(cond$message) )  
+    
+    #Choose a return value in case of error
+    return(FALSE)
+  },
+  finally = {
+    # NOTE:
+    # Here goes everything that should be executed at the end,
+    # Do nothing
+  })
   
   
-  sync_temp_patients  <- dbGetQuery( con.local , paste0("select * from public.sync_temp_patients  where mainclinicname ='", main.clinic.name, "' ;" )  )
+  status
   
-  return(sync_temp_patients)
+  
+  
+  
   
 }
 
@@ -86,5 +194,27 @@ refferPatients <- function(con.farmac, reffered.patients) {
   })
   
   return(status)
+  
+}
+
+
+#' 
+#' @param us.name nome US
+#' @param data.evento data em que o erro acontece
+#' @param accao o que estava a tentar-se executar
+#' @param erro msg de erro  
+#' @return NA
+#' @examples 
+#' 
+#' us_name <- 'CS Albazine'
+#' data <- Sys.Date()
+#' action  <- 'get Farmac Patients
+#' erro <- 'Can not connect to server + excption.msg '
+#' saveLogError(us_name,data,action ,erro )
+#' 
+saveLogError <- function (us.name, event.date, action, error){
+  
+  # insere a linha de erro no log
+  logErro  <<-  add_row(logErro,us = us.name, data_evento =event.date, accao =action, Erro= error)
   
 }
