@@ -168,6 +168,7 @@ if(checkScriptsExists(files = c('config/config_properties.R','get_dispenses.R','
       ## gravar os logs
       message("Algo correu mal, veja os erros na console")
       save(logErro,file = 'logs/logErro.RData')
+      stop('Algo correu mal, veja os erros na console')
       #rm(list=setdiff(ls(), c("wd", "is.farmac",) ))
 } 
     
@@ -175,18 +176,21 @@ if(checkScriptsExists(files = c('config/config_properties.R','get_dispenses.R','
     
     ## Houve problema de conexao...
     ## gravar os logs
+    
     message("Algo correu mal, veja os erros na console")
     save(logErro,file = 'logs/logErro.RData')
     rm(list=setdiff(ls(), c("wd", "is.farmac") ))
-    
+    stop('Algo correu mal, veja os erros na console')
   } 
     
 }    else{
   message( paste0('Ficheiros em falta. Veja o erro anterior'))
+  stop('Algo correu mal, veja os erros na console')
 }
 
   
 } else {
   
   message( paste0('O Directorio ', wd, ' nao existe, por favor configure corectamente o dir'))
+  stop('Algo correu mal, veja os erros na console')
 }

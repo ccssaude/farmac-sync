@@ -9,7 +9,6 @@ source('config/config_properties.R')
 
 ########################################################### 
 
-
 # con_farmac = FALSE para casos de conexao nao estabelecida
 if(! is.logical(con_farmac) ){
   
@@ -45,6 +44,8 @@ if(! is.logical(con_farmac) ){
             # remover a coluna imported ( nao precisamos dela neste script)
             sync_dispense_farmac <- sync_dispense_farmac[ , -which( names(sync_dispense_farmac) %in% c("imported"))]
             sync_dispense_local <- sync_dispense_local[ , -which( names(sync_dispense_local) %in% c("imported"))]
+            sync_dispense_local <- sync_dispense_local[ , -which( names(sync_dispense_local) %in% c("openmrs_status"))]
+            sync_dispense_local <- sync_dispense_local[ , -which( names(sync_dispense_local) %in% c("send_openmrs"))]
             
             
            # dispenses_to_get <-  anti_join(sync_dispense_farmac, sync_dispense_local,   by=c('id','clinic_name_farmac') )
@@ -70,6 +71,7 @@ if(! is.logical(con_farmac) ){
                   
                   
                 }
+                message(paste0('Actualizadas ', nrow(dispenses_to_get), ' dispensas da farmac'))
                 
                 log_farmac_dispenses <- getLogDispenseFromServer(con.farmac = con_farmac,
                                                                  clinic.name = main_clinic_name)
@@ -165,7 +167,7 @@ if(! is.logical(con_farmac) ){
           }
           else{ # primeiro envio
             
-            # nao ha dispensas no servidor -> local buscar todas do servidor farmac
+            # nao ha dispensas no servidor  local -> buscar todas do servidor farmac
             dispenses_to_get <- sync_dispense_farmac
             dispenses_to_get <- dispenses_to_get[ , -which( names(dispenses_to_get) %in% c("imported"))]
             
@@ -188,6 +190,7 @@ if(! is.logical(con_farmac) ){
                 
                 
               }
+              message(paste0('Actualizadas ', nrow(dispenses_to_get), ' dispensas '))
               
               log_farmac_dispenses <- getLogDispenseFromServer(con.farmac = con_farmac,
                                                                clinic.name = main_clinic_name)
@@ -301,6 +304,7 @@ if(! is.logical(con_farmac) ){
   ## Houve problema de conexao...
   ## gravar os logs
   save(logErro,file = 'logs/logErro.RData')
+  message("Nao foi possivel connectar-se ao servidor farmac, veja os erros na console")
   
 }
 

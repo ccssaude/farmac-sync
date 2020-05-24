@@ -6,15 +6,13 @@ rm(list=setdiff(ls(), c("wd", "is.farmac") ))
 
 source('config/config_properties.R')     
 
-
 #####################################################################################################
-
 
 
 if(!is.logical(con_local)){
   # busca todas dispensas nao evniadas para openmrs : imported =''
   
-  dispenses_to_send_openmrs <- getDispensesToSendOpenMRS(con_local)
+  dispenses_to_send_openmrs <- getDispensesToUpdateIdart(con_local)
   
   
   if (nrow(dispenses_to_send_openmrs)> 0){
@@ -72,7 +70,8 @@ if(!is.logical(con_local)){
           regime_id <- regimet$regimeid[1]
           
         } else {
-          regime_id <- getLastKnownRegimeID(con.local = con_local,patient.id =patient_id)
+          temp_reg <- getLastKnownRegimeID(con.local = con_local,patient.id =patient_id)
+          regime_id <-as.numeric(temp_reg$regimeid[1]) 
         }
         ## ******  LinhaT ID
         ############################################################################
@@ -145,11 +144,13 @@ if(!is.logical(con_local)){
                              message('hurray!!!! everythings was saved')
                              
                              ## actualizar sync_temp dispense
-                          
-                                dispense_date <- as.Date(packagedruginfotmp_to_save[1,]$dispensedate[1])
+                             dbSendQuery(con_local,paste0( "update sync_temp_dispense set send_openmrs = 'yes' where id = ",all_patient_dispenses[j,]$id[1], " ;" ) )
+                        
+                             dispense_date <- as.Date(packagedruginfotmp_to_save[1,]$dispensedate[1])
 
-                                 vec_id <- all_patient_dispenses[j,]$id[ 
-                                  which( as.Date(all_patient_dispenses[j,]$dispensedate) ==dispense_date )]
+                                 vec_id <- dispenses_to_send_openmrs$id[ 
+                                  which( as.Date(dispenses_to_send_openmrs$dispensedate) == dispense_date &
+                                           dispenses_to_send_openmrs$patientid==nid )]
                                  
                                if(length(vec_id)>1){
                                  
@@ -251,10 +252,9 @@ if(!is.logical(con_local)){
           for (t in 1:nrow(df_transicoes_dt)) {
             
             dispense_date <- as.Date(df_transicoes_dt$dispensedate[t])
-            
-            
+
             vec_id <- df_transicoes_dt$id[ 
-              which( as.Date(df_transicoes_dt$dispensedate) ==dispense_date )]
+              which( as.Date(df_transicoes_dt$dispensedate) == dispense_date )]
             
             if(length(vec_id)>1){
               
@@ -262,15 +262,19 @@ if(!is.logical(con_local)){
                 
                 id <- vec_id[k]
                 sql_query <- paste0( "update sync_temp_dispense set imported = 'yes' where id = ",id, " ;" )
+                sql_query_delete_transporte <- paste0( "delete from  sync_temp_dispense where id = ",id, " ;" )
                 print(sql_query)
                 dbSendQuery(con_local,sql_query )
+                dbSendQuery(con_local,sql_query_delete_transporte )
               }
               
               
             } else {
+              sql_query_delete_transporte <- paste0( "delete from  sync_temp_dispense where id = ",id, " ;" )
               sql_query <- paste0( "update sync_temp_dispense set imported = 'yes' where id = ",vec_id[1], " ;" )
               print(sql_query)
               dbSendQuery(con_local,sql_query )
+              dbSendQuery(con_local,sql_query_delete_transporte )
               
             }
             
@@ -306,7 +310,8 @@ if(!is.logical(con_local)){
             regime_id <- regimet$regimeid[1]
             
           } else {
-            regime_id <- getLastKnownRegimeID(con.local = con_local,patient.id =patient_id)
+            temp_reg <- getLastKnownRegimeID(con.local = con_local,patient.id =patient_id)
+            regime_id <-as.numeric(temp_reg$regimeid[1]) 
           }
           ## ******  LinhaT ID
           ############################################################################
@@ -387,13 +392,23 @@ if(!is.logical(con_local)){
                               message('hurray!!!! everythings was saved')
                               
                               ## actualizar sync_temp dispense
+                              for (var in 1:nrow(patient_dispense)) {
+                                dbSendQuery(con_local,paste0( "update sync_temp_dispense set send_openmrs = 'yes' where id = ",patient_dispense[var,]$id[1], " ;" ) )
+                                
+                              }
+
+                              ## actualizar sync_temp dispense
                               for (t in 1:nrow(packagedruginfotmp_to_save)) {
                                 
                                 dispense_date <- as.Date(packagedruginfotmp_to_save$dispensedate[t])
                                
                                 
-                                vec_id <- patient_dispense$id[ 
-                                  which( as.Date(patient_dispense$dispensedate) ==dispense_date )]
+                                vec_id <- dispenses_to_send_openmrs$id[ 
+                                  which( as.Date(dispenses_to_send_openmrs$dispensedate) == dispense_date &
+                                           dispenses_to_send_openmrs$patientid==nid )]
+                                
+                                # vec_id <- patient_dispense$id[ 
+                                #   which( as.Date(patient_dispense$dispensedate) ==dispense_date )]
                                 
                                 if(length(vec_id)>1){
                                   
@@ -511,6 +526,10 @@ if(!is.logical(con_local)){
                           status_pdit <- savePackageDrugInfoTmp(con_local,packagedruginfotmp_to_save )
                           if(status_pdit){
                             message('hurray!!!! everythings was saved')
+                            ## actualizar sync_temp dispense
+                
+   
+                            dbSendQuery(con_local,paste0( "update sync_temp_dispense set send_openmrs = 'yes' where id = ",patient_dispense[1,]$id[1], " ;" ) )
                             
                             ## actualizar sync_temp dispense
                             
