@@ -1,24 +1,16 @@
-###########################################################
-
-# Limpar o envinronment & inicializar as
-
-rm(list = setdiff(ls(), c("wd", "is.farmac")))
-
-source('config/config_properties.R')
 
 
 ###########################################################
 
 # con_farmac = FALSE para casos de conexao nao estabelecida
-if (!is.logical(con_farmac)) {
-  # Get local  connections
-  # con_local = FALSE para casos de conexao nao estabelecida
-  if (!is.logical(con_local)) {
+# if (!is.logical(con_farmac)) {
+#   # Get local  connections
+#   # con_local = FALSE para casos de conexao nao estabelecida
+#   if (!is.logical(con_local)) {
     if (is.farmac) {
       log_error_server <- getLogErrorFromServer(con_farmac, farmac_name)
       
-    }
-    else {
+    }  else {
       log_error_server <-
         getLogErrorFromServer(con_farmac, main_clinic_name)
       
@@ -93,17 +85,17 @@ if (!is.logical(con_farmac)) {
     }   else {
       save(logErro, file = 'logs/logErro.RData')
     }
-    
-  }
-  else {
-    # erro de comunicacao
-    save(logErro, file = 'logs/logErro.RData')
-  }
-  
-  
-  
-  
-} else {
-  # erro de comunicacao
-  save(logErro, file = 'logs/logErro.RData')
-}
+#   ---  
+#   }
+#   else {
+#     # erro de comunicacao
+#     save(logErro, file = 'logs/logErro.RData')
+#   }
+#   
+#   
+#   
+#   
+# } else {
+#   # erro de comunicacao
+#   save(logErro, file = 'logs/logErro.RData')
+# }

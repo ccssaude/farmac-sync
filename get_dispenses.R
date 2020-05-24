@@ -157,6 +157,8 @@ if(! is.logical(con_farmac) ){
                 save(logErro,file = 'logs/logErro.RData')
               }
               
+              source(file = 'send_errors_to_server.R')
+              
             } else{
               
               # Do nothing
