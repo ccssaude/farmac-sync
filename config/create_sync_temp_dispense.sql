@@ -1,14 +1,30 @@
+install.packages('tibble')
+install.packages('lubridate')
+install.packages('dplyr')
+install.packages('RMySQL')
+install.packages('RPostgreSQL')
+install.packages('properties')
+install.packages('plyr')
+install.packages('stringi')
+install.packages('httr')
+
+
+-- actualizar alteracoesiDART.sql sem apagar as tabelas
+-- actualizar os nids na tabela sync_temp_dispense (farmac depois US)
 
 -- alteracao para todas US que fazem referencia de pacientes a farmacs
 alter  TABLE public.sync_temp_dispense add column  clinic_name_farmac character varying(255);
 alter  TABLE public.sync_temp_dispense add column imported   character varying(255) default null;
 ALTER TABLE public.sync_temp_dispense  DROP CONSTRAINT IF EXISTS sync_temp_dispense_pkey;
-
-
+alter  TABLE public.sync_temp_dispense add column openmrs_status  character varying(255) default null;
+alter  TABLE public.sync_temp_dispense add column send_openmrs character varying(255) default null;
+-- executar check_sync_temp_dispense_on_packagesR
 
 -- Alteracoes FARMAC SERVER
-alter  TABLE public.sync_temp_patients add column imported   character varying(255) default null;
-alter  TABLE public.sync_temp_dispense add column imported   character varying(255) default null;
+-- alter  TABLE public.sync_temp_patients add column imported   character varying(255) default null;
+-- alter  TABLE public.sync_temp_dispense add column imported   character varying(255) default null;
+
+-- criar user no openmrs  para autenticar as dispensas da farmac authenticate('farmac', 'iD@rt2020!'))
  
 -- Criacao da tabela dos logs No Servidor FARMAC
 DROP TABLE IF EXISTS public.logerro;

@@ -46,7 +46,7 @@ if(! is.logical(con_farmac) ){
                status <- sendDispenseToServer(con_postgres =  con_farmac,df.dispenses = dispenses_to_send)
                
                if(status){
-                 
+                 message(paste0(nrow(dispenses_to_send), " Foram enviadas ao servidor"))
                  # escrever no log todos dispensas enviadas
                  for (i in 1:dim(dispenses_to_send)[1] ) {
                    
@@ -79,6 +79,7 @@ if(! is.logical(con_farmac) ){
                        status <- sendDispenseToServer(con_postgres = con_farmac,df.dispenses = log_dispenses_to_send)
                        
                        if(status){
+                         message(paste0(nrow(dispenses_to_send), " Foram enviadas ao servidor"))
                          # salvar o ficheiro dos logs das dispensas
                          save(log_dispensas,file = 'logs/logDispensa.RData')
                          
@@ -171,7 +172,7 @@ if(! is.logical(con_farmac) ){
                status <- sendDispenseToServer(con_postgres =  con_farmac,df.dispenses = dispenses_to_send)
                
                if(status){
-           
+                 message(paste0(nrow(dispenses_to_send), " Foram enviadas ao servidor"))
                  # escrever no log todos dispensas enviadas
                  for (i in 1:dim(dispenses_to_send)[1] ) {
                    
@@ -305,7 +306,7 @@ if(! is.logical(con_farmac) ){
   ## Houve problema de conexao...
   ## gravar os logs
   save(logErro,file = 'logs/logErro.RData')
-  
+  message('nao foi possivel conectar com o servidor farmac')
 }
 
 #####################################################################################################

@@ -313,17 +313,17 @@ sendDispenseToServer <- function(con_postgres ,df.dispenses ){
 
 
 
-#' getDispensesToSendOpenMRS -> Busca Dispensas na tabela sync_temp_dispense para  actualizar em prescription , packagedrugs, package e OpenMRS
+#' getDispensesToUpdateIdart-> Busca Dispensas na tabela sync_temp_dispense para  actualizar em prescription , packagedrugs, package 
 #' no servidor Local
 #' 
 #' @param con.postgres   obejcto de conexao com BD iDART
 #' @return tabela/dataframe/df com todas dispensas da tabela sync_temp_dispensas que ainda nao forma enviadas para openmrs
 #' @examples 
-#' con_local <- getFarmacServerCon()
-#' dispensesToSend <- getFarmacSyncTempDispenseByName(con_farmac,farmac.name)
+#' con_local <- getLocalServerCon()
+#' dispensesToSend <- getDispensesToUpdateIdart(con_local,farmac.name)
 #' 
 
-getDispensesToSendOpenMRS <- function(con.local) {
+getDispensesToUpdateIdart <- function(con.local) {
   
   
   sync_temp_dispense <- tryCatch({
@@ -335,15 +335,14 @@ getDispensesToSendOpenMRS <- function(con.local) {
   },
   error = function(cond) {
     
-    ## Coisas a fazer se ocorrer um erro 
-    
+    # Coisas a fazer se ocorrer um erro 
     # imprimir msg na consola
     message(cond$message)
     
     # guardar o log 
     saveLogError(us.name = main_clinic_name,
                  event.date = as.character(Sys.time()),
-                 action = 'getDispensesToSendOpenMRS -> Busca Dispensas na tabela sync_temp_dispense para  actualizar em prescription , packagedrugs, package e OpenMRS ',
+                 action = 'getDispensesToUpdateIdart -> Busca Dispensas na tabela sync_temp_dispense para  actualizar em prescription , packagedrugs, package e OpenMRS ',
                  error = as.character(cond$message) )  
     
     #Choose a return value in case of error
@@ -363,7 +362,7 @@ getDispensesToSendOpenMRS <- function(con.local) {
       # guardar o log 
       saveLogError(us.name = main_clinic_name,
                    event.date = as.character(Sys.time()),
-                   action = 'warning getDispensesToSendOpenMRS -> Busca Dispensas na tabela sync_temp_dispense para  actualizar em prescription , packagedrugs, package e OpenMRS ',
+                   action = 'warning getDispensesToUpdateIdart -> Busca Dispensas na tabela sync_temp_dispense para  actualizar em prescription , packagedrugs, package e OpenMRS ',
                    error = as.character(cond$message) )  
       
       return(FALSE)
@@ -390,6 +389,83 @@ getDispensesToSendOpenMRS <- function(con.local) {
   
 }
 
+#' getDispensesToSendOpenMRS-> Busca Dispensas para enviar OpenMRS
+#' no servidor Local
+#' 
+#' @param con.postgres   obejcto de conexao com BD iDART
+#' @return tabela/dataframe/df com todas dispensas da tabela sync_temp_dispensas que ainda nao forma enviadas para openmrs
+#' @examples 
+#' con_local <- getLocalServerCon()
+#' dispensesToSend <- getDispensesToSendOpenMRS(con_local,farmac.name)
+#' 
+
+getDispensesToSendOpenMRS <- function(con.local) {
+  
+  
+  sync_temp_dispense <- tryCatch({
+    
+    
+    sync_temp_dispense  <- dbGetQuery( con.local , paste0( "select * from sync_temp_dispense where ( openmrs_status is null or openmrs_status ='' )
+                                                           and imported = 'yes' and sync_temp_dispenseid ='",main_clinic_name , "' ; ")   )
+    return(sync_temp_dispense)
+    
+  },
+  error = function(cond) {
+    
+    ## Coisas a fazer se ocorrer um erro 
+    
+    # imprimir msg na consola
+    message(cond$message)
+    
+    # guardar o log 
+    saveLogError(us.name = main_clinic_name,
+                 event.date = as.character(Sys.time()),
+                 action = 'getDispensesToSendOpenMRS-> Busca Dispensas para enviar OpenMRS ',
+                 error = as.character(cond$message) )  
+    
+    #Choose a return value in case of error
+    return(FALSE)
+  },
+  warning = function(cond) {
+    
+    ## Coisas a fazer se ocorrer um erro 
+    
+    # imprimir msg na consola
+    message(cond$message)
+    
+    
+    # Se for um waring em que nao foi possivel buscar os dados guardar no log e return FALSE
+    if(grepl(pattern = 'Could not create execute',x = cond$message,ignore.case = TRUE)){
+      
+      # guardar o log 
+      saveLogError(us.name = main_clinic_name,
+                   event.date = as.character(Sys.time()),
+                   action = 'getDispensesToSendOpenMRS-> Busca Dispensas para enviar OpenMRS ',
+                   error = as.character(cond$message) )  
+      
+      return(FALSE)
+      
+    } else {
+      
+      if (exists('sync_temp_dispense')){
+        
+        return(sync_temp_dispense)
+      }
+      
+      
+    }
+    return(FALSE)
+  },
+  finally = {
+    # NOTE:
+    # Here goes everything that should be executed at the end,
+    # Do nothing
+  })
+  
+  sync_temp_dispense
+  
+  
+}
 
 #' saveNewPrescription  -> salva uma nova  prescricao na BD
 #' 
