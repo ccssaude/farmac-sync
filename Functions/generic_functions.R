@@ -1383,7 +1383,7 @@ getPatientId <- function(df.temp.patients,patient) {
 
 composePrescription <- function(df.dispense,linha.id, regime.id,provider.id, patient.id, nid,prescription.id) {
  
-  load('config/prescription.Rdata')
+  load('config\\prescription.Rdata')
 
 
   precription <- add_row( precription,
@@ -1438,7 +1438,7 @@ composePrescription <- function(df.dispense,linha.id, regime.id,provider.id, pat
 
 composePrescribedDrugs <- function(df.dispense, prescription.id) {
   
-  load('config/prescribeddrugs.RData')
+  load('config\\prescribeddrugs.RData')
  
   temp_prescribeddrugs <- prescribeddrugs
     
@@ -1487,7 +1487,7 @@ composePrescribedDrugs <- function(df.dispense, prescription.id) {
 composePackageOpenmrs <- function(df.packagedruginfotmp) {
   
 
-  load(file = 'config/package.RData' )
+  load(file = 'config\\package.RData' )
   temp_package <- package
   temp_package <- add_column(temp_package,amount='')
   temp_package <- add_column(temp_package,customizedDosage='')
@@ -1547,7 +1547,7 @@ composePackageOpenmrs <- function(df.packagedruginfotmp) {
 composePackage <- function(df.packagedruginfotmp, prescription.to.save) {
   
   
-  load(file = 'config/package.RData')
+  load(file = 'config\\package.RData')
   temp_package <- package
   
   for (v in 1:nrow(df.packagedruginfotmp)) {
@@ -1595,7 +1595,7 @@ return(temp_package)
 composePackagedDrugs <- function(df.packagedruginfotmp, package.to.save ) {
   
   # carrega df vazio packageddrugs
-  load(file = 'config/packageddrugs.RData')
+  load(file = 'config\\packageddrugs.RData')
   temp_packageddrugs <- packageddrugs
   
   for (v in 1:nrow(df.packagedruginfotmp)) {
@@ -1631,7 +1631,7 @@ return(temp_packageddrugs)
 
 composePackageDrugInfoTmp <- function(df.patient.dispenses, user.id) {
   
-  load(file = 'config/packagedruginfotmp.RData') 
+  load(file = 'config\\packagedruginfotmp.RData') 
   temp_packagedruginfotmp <- packagedruginfotmp
   
   for(i in 1:nrow(df.patient.dispenses)){
@@ -1694,7 +1694,7 @@ composePackageDrugInfoTmp <- function(df.patient.dispenses, user.id) {
 
 composePackageDrugInfoTmpOpenMRS <- function(df.patient.dispenses, user.id, regime.uuid) {
 
-  load(file = 'config/packagedruginfotmp.RData')
+  load(file = 'config\\packagedruginfotmp.RData')
   
   temp_packagedruginfotmp <- packagedruginfotmp
 
@@ -1829,7 +1829,7 @@ composePackageDrugInfoTmpOpenMRS <- function(df.patient.dispenses, user.id, regi
   #' user_admin  <- ReadJdbcProperties(file)
   #' 
   
-  readJdbcProperties <- function(file='config/jdbc.properties') {
+  readJdbcProperties <- function(file='config\\jdbc.properties') {
 
 
     vec <- as.data.frame(read.properties(file = file ))
@@ -1933,7 +1933,7 @@ composePackageDrugInfoTmpOpenMRS <- function(df.patient.dispenses, user.id, regi
                    event.date = as.character(Sys.time()),
                    action = 'sendFilaOpenMRS',
                    error = paste0("Erro ao enviar fila do paciente: nid",df.patient[1], " - uuid:",df.patient[4] ))
-      save(logErro,file = 'logs/logErro.RData')
+      save(logErro,file = 'logs\\logErro.RData')
       print(as.character(r$error$message))
       return(FALSE)
     }

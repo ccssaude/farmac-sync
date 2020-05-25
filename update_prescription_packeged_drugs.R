@@ -4,7 +4,7 @@ library(lubridate)
 
 rm(list=setdiff(ls(), c("wd", "is.farmac") ))
 
-source('config/config_properties.R')     
+source('C:\\farmac-sync\\config\\config_properties.R')      
 
 #####################################################################################################
 
@@ -54,16 +54,16 @@ if(!is.logical(con_local)){
         patient_id  <- getPatientId(tmp_patients,patient)
         
         if(patient_id==0){
-          save(logErro,file='logs/logErro.RData')
+          save(logErro,file='logs\\logErro.RData')
           message ("paciente nao existe na BD local  gravar um erro . e passar para o proxmo") 
           break
         }
         ######################################################################
         ################### Load estrutura das tabelas
-        # load(file = 'config/prescription.Rdata')
-       # load(file = 'config/prescribeddrugs.RData')
-        #load(file = 'config/regimes.RData')
-        load(file = 'config/linhast.RData')
+        # load(file = 'config\\prescription.Rdata')
+       # load(file = 'config\\prescribeddrugs.RData')
+        #load(file = 'config\\regimes.RData')
+        load(file = 'config\\linhast.RData')
           
         ## ******  Provider ID
         ############################################################################
@@ -184,7 +184,7 @@ if(!is.logical(con_local)){
                            dbSendQuery(con_local, paste0("delete from prescribeddrugs where id =",prescribeddrugs_to_save$id[1], " ;" ))
                            dbSendQuery(con_local, paste0(' delete from prescription where id = ',prescription_id ,' ;' ))
                            message (paste0( 'Erro ao gravar package : Rollback status:') )
-                           save(logErro, file = 'logs/logErro.RData')
+                           save(logErro, file = 'logs\\logErro.RData')
                          }
                          
                        } else {
@@ -192,34 +192,34 @@ if(!is.logical(con_local)){
                          dbSendQuery(con_local, paste0("delete from package where id =",package_to_save$id[1], " ;" ))
                          dbSendQuery(con_local, paste0("delete from prescribeddrugs where id =",prescribeddrugs_to_save$id[1], " ;" ))
                          dbSendQuery(con_local, paste0(' delete from prescription where id = ',prescription_id ,' ;' ))
-                         save(logErro, file = 'logs/logErro.RData')
+                         save(logErro, file = 'logs\\logErro.RData')
                        }
 
                    } else { # roll back 
                      message ('Erro ao gravar package')
                      dbSendQuery(con_local, paste0("delete from prescribeddrugs where id =",prescribeddrugs_to_save$id[1], " ;" ))
                      dbSendQuery(con_local, paste0(' delete from prescription where id = ',prescription_id ,' ;' ))
-                     save(logErro,file='logs/logErro.RData')
+                     save(logErro,file='logs\\logErro.RData')
                      message("Erro ao salvar prescricao") 
                      
                    }
                  } else {
                    # roll back 
                    dbSendQuery(con_local, paste0(' delete from prescription where id =',prescription_id ,' ;' ))
-                   save(logErro,file='logs/logErro.RData')
+                   save(logErro,file='logs\\logErro.RData')
                    message("Erro ao salvar prescricao") 
                    
                    
                  } 
                } else {
-                 save(logErro,file='logs/logErro.RData')
+                 save(logErro,file='logs\\logErro.RData')
                  message("Erro ao salvar prescribeddrugs!") 
                  
                }
 
                  
                } else {
-                 save(logErro,file='logs/logErro.RData')
+                 save(logErro,file='logs\\logErro.RData')
                  message("Erro ao salvar prescricao!") 
                  
                }
@@ -236,7 +236,7 @@ if(!is.logical(con_local)){
         
 
         # TODO ha prescricoes que tem mais de um medicamento
-        load(file = 'config/linhast.RData')
+        load(file = 'config\\linhast.RData')
         
         ## ******  Provider ID
         ############################################################################
@@ -303,7 +303,7 @@ if(!is.logical(con_local)){
           patient_id  <- getPatientId(tmp_patients,patient)
           
           if(patient_id==0){
-            save(logErro,file='logs/logErro.RData')
+            save(logErro,file='logs\\logErro.RData')
             message ("paciente nao existe na BD local  gravar um erro . e passar para o proxmo") 
             break
           }
@@ -444,7 +444,7 @@ if(!is.logical(con_local)){
                             dbSendQuery(con_local, paste0(' delete from prescribeddrugs where id = ',prescribed_drug_to_save$id[1] ,' ;' ))
                             dbSendQuery(con_local, paste0(' delete from prescription where id = ',prescription_id ,' ;' ))
                             message (paste0( 'Erro ao gravar package : Rollback status:') )
-                            save(logErro, file = 'logs/logErro.RData')
+                            save(logErro, file = 'logs\\logErro.RData')
                           }
                           
                         } else {
@@ -453,21 +453,21 @@ if(!is.logical(con_local)){
                           dbSendQuery(con_local, paste0("delete from prescribeddrugs where id = ",prescribeddrugs_to_save$id[1]," ;" ))
                           dbSendQuery(con_local, paste0(' delete from prescription where id = ',prescription_id ,' ;' ))
                           dbSendQuery(con_local, paste0(' delete from prescribeddrugs where id = ',prescribed_drug_to_save$id[1] ,' ;' ))
-                          save(logErro, file = 'logs/logErro.RData')
+                          save(logErro, file = 'logs\\logErro.RData')
                         }
                         
                       } else { # roll back 
 
                         dbSendQuery(con_local, paste0("delete from prescribeddrugs where id = ",prescribeddrugs_to_save$id[1]," ;" ))
                         dbSendQuery(con_local, paste0(' delete from prescription where id = ',prescription_id ,' ;' ))
-                        save(logErro,file='logs/logErro.RData')
+                        save(logErro,file='logs\\logErro.RData')
                         message("Erro ao salvar prescricao") 
                         
                       }
                     } else {
                       # roll back 
                       dbSendQuery(con_local, paste0(' delete from prescription where id =',prescription_id ,' ;' ))
-                      save(logErro,file='logs/logErro.RData')
+                      save(logErro,file='logs\\logErro.RData')
                       message("Erro ao salvar prescribeddrugs") 
                       
                       
@@ -477,7 +477,7 @@ if(!is.logical(con_local)){
                   
                 }   
                   else {
-                      save(logErro,file='logs/logErro.RData')
+                      save(logErro,file='logs\\logErro.RData')
                       message("Erro ao salvar prescribeddrugs") 
               
                       }
@@ -571,12 +571,12 @@ if(!is.logical(con_local)){
                             dbSendQuery(con_local, paste0("delete from prescribeddrugs where id = ",prescribeddrugs_to_save$id[1]," ;" ))
                             dbSendQuery(con_local, paste0(' delete from prescription where id = ',prescription_id ,' ;' ))
                             message (paste0( 'Erro ao gravar package : Rollback status:') )
-                            save(logErro, file = 'logs/logErro.RData')
+                            save(logErro, file = 'logs\\logErro.RData')
                           }
                           
                         } else {
                           message ('Erro ao gravar package')
-                          save(logErro, file = 'logs/logErro.RData')
+                          save(logErro, file = 'logs\\logErro.RData')
                           dbSendQuery(con_local, paste0(' delete from package where id = ',package_to_save$id[1] ,' ;' ))
                           dbSendQuery(con_local, paste0(' delete from prescribeddrugs where id = ',prescribeddrugs_to_save$id[1] ,' ;' ))
                           dbSendQuery(con_local, paste0(' delete from prescription where id = ',prescription_id ,' ;' ))
@@ -585,14 +585,14 @@ if(!is.logical(con_local)){
                       } else { # roll back 
                         dbSendQuery(con_local, paste0(' delete from prescribeddrugs where id = ',prescribeddrugs_to_save$id[1] ,' ;' ))
                         dbSendQuery(con_local, paste0(' delete from prescription where id = ',prescription_id ,' ;' ))
-                        save(logErro,file='logs/logErro.RData')
+                        save(logErro,file='logs\\logErro.RData')
                         message("Erro ao salvar prescricao") 
                         
                       }
                     } else {
                       # roll back 
                       dbSendQuery(con_local, paste0(' delete from prescription where id =',prescription_id ,' ;' ))
-                      save(logErro,file='logs/logErro.RData')
+                      save(logErro,file='logs\\logErro.RData')
                       message("Erro ao salvar prescribeddrugs") 
                       
                       
@@ -603,7 +603,7 @@ if(!is.logical(con_local)){
                 
 
               } else {
-                save(logErro,file='logs/logErro.RData')
+                save(logErro,file='logs\\logErro.RData')
                 message("Erro ao salvar prescricao") 
                 
               }
@@ -633,5 +633,5 @@ if(!is.logical(con_local)){
 } else {
  
    message('Erro de conexao local')
-  save(logErro,file='logs/logErro.RData')
+  save(logErro,file='logs\\logErro.RData')
 }

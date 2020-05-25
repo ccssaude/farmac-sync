@@ -4,7 +4,7 @@
 
 rm(list=setdiff(ls(), c("wd", "is.farmac") ))
 
-source('config/config_properties.R')     
+source('C:\\farmac-sync\\Functions\\config_properties.R')    
 
 
 ########################################################### 
@@ -91,12 +91,12 @@ if(! is.logical(con_farmac) ){
                       
                       if(status){
                         # salvar o ficheiro dos logs das dispensas
-                        save(log_dispensas,file = 'logs/logDispensa.RData')
+                        save(log_dispensas,file = 'logs\\logDispensa.RData')
                         
                       } else{
                         # salvar o ficheiro logs das dispensas & dos erros
-                        save(log_dispensas,file = 'logs/logDispensa.RData')
-                        save(logErro, file = 'logs/logErro.RData')
+                        save(log_dispensas,file = 'logs\\logDispensa.RData')
+                        save(logErro, file = 'logs\\logErro.RData')
                         
                       }
                       
@@ -109,7 +109,7 @@ if(! is.logical(con_farmac) ){
                     if(nrow(log_dispensas)==0){
                       
                       log_dispensas <- log_farmac_dispenses
-                      save(log_dispensas,file = 'logs/logDispensa.RData')
+                      save(log_dispensas,file = 'logs\\logDispensa.RData')
                     } else {
                       
                       
@@ -119,12 +119,12 @@ if(! is.logical(con_farmac) ){
                        
                        if(status){
                          # salvar o ficheiro dos logs das dispensas
-                         save(log_dispensas,file = 'logs/logDispensa.RData')
+                         save(log_dispensas,file = 'logs\\logDispensa.RData')
                          
                        } else{
                          # salvar o ficheiro logs das dispensas & dos erros
-                         save(log_dispensas,file = 'logs/logDispensa.RData')
-                         save(logErro, file = 'logs/logErro.RData')
+                         save(log_dispensas,file = 'logs\\logDispensa.RData')
+                         save(logErro, file = 'logs\\logErro.RData')
                          
                        }
                        
@@ -144,8 +144,8 @@ if(! is.logical(con_farmac) ){
                 else {
                   ##  A exception sera capturada na funcao getLogDispenseFromServer
                   # salvar o ficheiro dos logs das dispensas
-                  save(log_dispensas,file = 'logs/logDispensa.RData')
-                  save(logErro,file='logs/logErro.RData')
+                  save(log_dispensas,file = 'logs\\logDispensa.RData')
+                  save(logErro,file='logs\\logErro.RData')
                 }
                 
                 
@@ -154,7 +154,7 @@ if(! is.logical(con_farmac) ){
                 
               } else {
                 ##  A exception sera capturada na funcao sendDispenseToServer
-                save(logErro,file = 'logs/logErro.RData')
+                save(logErro,file = 'logs\\logErro.RData')
               }
               
               source(file = 'send_errors_to_server.R')
@@ -211,12 +211,12 @@ if(! is.logical(con_farmac) ){
                     
                     if(status){
                       # salvar o ficheiro dos logs das dispensas
-                      save(log_dispensas,file = 'logs/logDispensa.RData')
+                      save(log_dispensas,file = 'logs\\logDispensa.RData')
                       
                     } else{
                       # salvar o ficheiro logs das dispensas & dos erros
-                      save(log_dispensas,file = 'logs/logDispensa.RData')
-                      save(logErro, file = 'logs/logErro.RData')
+                      save(log_dispensas,file = 'logs\\logDispensa.RData')
+                      save(logErro, file = 'logs\\logErro.RData')
                       
                     }
                     
@@ -237,12 +237,12 @@ if(! is.logical(con_farmac) ){
                     
                     if(status){
                       # salvar o ficheiro dos logs das dispensas
-                      save(log_dispensas,file = 'logs/logDispensa.RData')
+                      save(log_dispensas,file = 'logs\\logDispensa.RData')
                       
                     } else{
                       # salvar o ficheiro logs das dispensas & dos erros
-                      save(log_dispensas,file = 'logs/logDispensa.RData')
-                      save(logErro, file = 'logs/logErro.RData')
+                      save(log_dispensas,file = 'logs\\logDispensa.RData')
+                      save(logErro, file = 'logs\\logErro.RData')
                       
                     }
                     
@@ -257,7 +257,7 @@ if(! is.logical(con_farmac) ){
                 
               } else {
                 ##  A exception sera capturada na funcao getLogDispenseFromServer
-                save(logErro,file = 'logs/logErro.RData')
+                save(logErro,file = 'logs\\logErro.RData')
               }
               
               
@@ -265,7 +265,7 @@ if(! is.logical(con_farmac) ){
               
               } else {
               ##  A exception sera capturada na funcao sendDispenseToServer
-              save(logErro,file = 'logs/logErro.RData')
+              save(logErro,file = 'logs\\logErro.RData')
             }
            
         }
@@ -278,7 +278,7 @@ if(! is.logical(con_farmac) ){
        
         ## Houve problema de conexao...
         ## gravar os logs
-        save(logErro,file = 'logs/logErro.RData')
+        save(logErro,file = 'logs\\logErro.RData')
         
       }
       
@@ -288,7 +288,7 @@ if(! is.logical(con_farmac) ){
       ## Houve problema de conexao...
       ## gravar os logs
   
-      save(logErro,file = 'logs/logErro.RData')
+      save(logErro,file = 'logs\\logErro.RData')
       
     }
     
@@ -297,7 +297,7 @@ if(! is.logical(con_farmac) ){
     
     ## Houve problema de conexao...
     ## gravar os logs
-    save(logErro,file = 'logs/logErro.RData')
+    save(logErro,file = 'logs\\logErro.RData')
     
   }
   
@@ -305,7 +305,7 @@ if(! is.logical(con_farmac) ){
   
   ## Houve problema de conexao...
   ## gravar os logs
-  save(logErro,file = 'logs/logErro.RData')
+  save(logErro,file = 'logs\\logErro.RData')
   message("Nao foi possivel connectar-se ao servidor farmac, veja os erros na console")
   
 }

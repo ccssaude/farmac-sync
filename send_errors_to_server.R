@@ -33,7 +33,7 @@
             sendLogError(con_postgres = con_farmac, df.logerror =  log_error_to_send)
           if (!status) {
             # salvar o ficheiro dos logs das dispensas
-            save(logErro, file = 'logs/logErro.RData')
+            save(logErro, file = 'logs\\logErro.RData')
           }
           
         }
@@ -59,7 +59,7 @@
             
             if (!status) {
               # salvar o ficheiro dos logs das dispensas
-              save(logErro, file = 'logs/logDispensa.RData')
+              save(logErro, file = 'logs\\logDispensa.RData')
               
             } else{
               message('Log erros enviados com sucesso')
@@ -83,13 +83,13 @@
       
       
     }   else {
-      save(logErro, file = 'logs/logErro.RData')
+      save(logErro, file = 'logs\\logErro.RData')
     }
 #   ---  
 #   }
 #   else {
 #     # erro de comunicacao
-#     save(logErro, file = 'logs/logErro.RData')
+#     save(logErro, file = 'logs\\logErro.RData')
 #   }
 #   
 #   
@@ -97,5 +97,5 @@
 #   
 # } else {
 #   # erro de comunicacao
-#   save(logErro, file = 'logs/logErro.RData')
+#   save(logErro, file = 'logs\\logErro.RData')
 # }

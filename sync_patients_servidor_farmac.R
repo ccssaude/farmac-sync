@@ -3,8 +3,8 @@
 # Limpar o envinronment & inicializar as 
 
 rm(list=setdiff(ls(), c("wd", "is.farmac") ))
+source('C:\\farmac-sync\\Functions\\config_properties.R') 
 
-source('Functions/patient_functions.R') 
 ########################################################### 
 
 # verifica se as conexoes foram criadas com sucesso is.logical(con_farmac) =FALSE
@@ -154,7 +154,7 @@ if(exists('pacientes_farmac') && exists('pacientes_referidos')){
     } else{
         
       message("Erro ao inserrir os pacientes na BD")
-      save(logErro,file = 'logs/logErro.RData')
+      save(logErro,file = 'logs\\logErro.RData')
       }
       
       
@@ -162,7 +162,7 @@ if(exists('pacientes_farmac') && exists('pacientes_referidos')){
       ## Enviar email (farmaciamaputo@ccsaude.org.mz) com um xls em anexo do df LogReferencia
       
       # salvar o ficheiro dos logs dos pacientes referidos
-      save(logReferencia,file = 'logs/logReferencia.RData')
+      save(logReferencia,file = 'logs\\logReferencia.RData')
     }else{
     
     # Do nothing
@@ -174,7 +174,7 @@ if(exists('pacientes_farmac') && exists('pacientes_referidos')){
   
 } else {
   
-  save(logErro,file = 'logs/logErro.RData')
+  save(logErro,file = 'logs\\logErro.RData')
 
   message( "Houve problema de conexao..." )
   ## gravar os logs
@@ -185,7 +185,7 @@ if(exists('pacientes_farmac') && exists('pacientes_referidos')){
 
 }else{
   
-  save(logErro,file = 'logs/logErro.RData')
+  save(logErro,file = 'logs\\logErro.RData')
   
   message( "Houve problema de conexao..." )
   ## gravar os logs

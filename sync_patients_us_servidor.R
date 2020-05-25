@@ -4,7 +4,7 @@
 
 rm(list=setdiff(ls(), c("wd", "is.farmac") ))
 
-source('Functions/patient_functions.R') 
+source('C:\\farmac-sync\\Functions\\config_properties.R') 
 ########################################################### 
 
 # verifica se as conexoes foram criadas com sucesso is.logical(con_farmac) =FALSE
@@ -38,7 +38,7 @@ if(!is.logical(con_farmac) & !is.logical(con_local)){
       message(paste0(nrow(novos_patients_por_referir), " Foram enviados ao sevidor"))
     } else{
       
-      save(logErro,file = 'logs/logErro.RData')
+      save(logErro,file = 'logs\\logErro.RData')
       
       message( "Tente novamente.Eerro ao enviar pacientes ao servidor ... Houve problema de conexao..." )
     }
@@ -47,7 +47,7 @@ if(!is.logical(con_farmac) & !is.logical(con_local)){
     
   } else {
     
-    save(logErro,file = 'logs/logErro.RData')
+    save(logErro,file = 'logs\\logErro.RData')
     
     message( "Houve problema de conexao..." )
     ## gravar os logs
@@ -60,7 +60,7 @@ if(!is.logical(con_farmac) & !is.logical(con_local)){
   
 }else{
   
-  save(logErro,file = 'logs/logErro.RData')
+  save(logErro,file = 'logs\\logErro.RData')
   
   message( "Houve problema de conexao..." )
   ## gravar os logs

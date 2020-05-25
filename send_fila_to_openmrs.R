@@ -4,11 +4,10 @@ library(RMySQL)
 
 rm(list=setdiff(ls(), c("wd", "is.farmac") ))
 
-source('config/config_properties.R')
+source('C:\\farmac-sync\\config\\config_properties.R') 
 
-source(file = 'Functions/generic_functions.R')
 #####################################################################################################
-# default file='config/jdbc.properties'
+# default file='config\\jdbc.properties'
 jdbc_properties = readJdbcProperties()
 openmrs.user ='esaude'                           # ******** modificar
 openmrs.password='esaude'                         # ******** modificar
@@ -55,7 +54,7 @@ if(!is.logical(con_local)){
       patient <-  c(nid, all_patient_dispenses$patientfirstname[1],all_patient_dispenses$patientlastname[1])
       patient_id  <- getPatientId(tmp_patients,patient)
       if(patient_id==0){
-        save(logErro,file='logs/logErro.RData')
+        save(logErro,file='logslogErro.RData')
         message ("paciente nao existe na BD local  gravar um erro . e passar para o proxmo") 
         break
       }
@@ -140,7 +139,7 @@ if(!is.logical(con_local)){
 else {
   
   message('Erro de conexao local')
-  save(logErro,file='logs/logErro.RData')
+  save(logErro,file='logslogErro.RData')
   }
   
 } else{
