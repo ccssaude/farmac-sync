@@ -56,6 +56,7 @@ if(!is.logical(con_local)){
         if(patient_id==0){
           save(logErro,file='logs\\logErro.RData')
           message ("paciente nao existe na BD local  gravar um erro . e passar para o proxmo") 
+          message(" Neste bloco")
           break
         }
         ######################################################################
@@ -303,8 +304,13 @@ if(!is.logical(con_local)){
           patient_id  <- getPatientId(tmp_patients,patient)
           
           if(patient_id==0){
+            saveLogError(us.name = main_clinic_name,
+                         event.date = Sys.time(),
+                         action = 'Get patientid- not found',
+                         error = nid)
             save(logErro,file='logs\\logErro.RData')
             message ("paciente nao existe na BD local  gravar um erro . e passar para o proxmo") 
+            message("naquele bloco")
             break
           }
           
@@ -624,7 +630,10 @@ if(!is.logical(con_local)){
       
     
     
-    } }   else {
+    } 
+    
+    
+    }  else {
     
     message('Sem dispensas por actualizar')
   }
