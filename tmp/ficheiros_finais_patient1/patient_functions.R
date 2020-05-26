@@ -49,7 +49,7 @@ insertPatient <- function(con.postgres,df.patients){
   
   
   status
-  
+
 }
 
 #' insertPatientIdentifier -> insere pacientes na tabela PatientIdentifier 
@@ -66,7 +66,7 @@ insertPatientIdentifier <- function(con.postgres,df.patientidentifier){
   status <- tryCatch({
     
     
-    status = dbWriteTable(con.postgres, "patientidentifier", df.patients ,append=TRUE, row.names=FALSE)
+    status = dbWriteTable(con.postgres, "patientidentifier", df.patientidentifier ,append=TRUE, row.names=FALSE)
     
     return(status)
   },
@@ -115,7 +115,7 @@ insertPatientAttribute <- function(con.postgres,df.patientattribute){
   status <- tryCatch({
     
     
-    status = dbWriteTable(con.postgres, "patientattribute", df.patients ,append=TRUE, row.names=FALSE)
+    status = dbWriteTable(con.postgres, "patientattribute", df.patientattribute ,append=TRUE, row.names=FALSE)
     
     return(status)
   },
@@ -176,7 +176,7 @@ refferPatients <- function(con.farmac, reffered.patients) {
     
     ## Coisas a fazer se occorre um erro 
     # imprimir msg na consola
-    message(cond$message)
+      message(cond$message)
     
     # guardar o log 
     saveLogError(us.name = main_clinic_name,
@@ -221,103 +221,57 @@ saveLogError <- function (us.name, event.date, action, error){
 
 
 
-#' receberPacienteServer-> carrega pacientes do servidor para farmac 
-#' 
+
+
+
+
+
+
+#' receberPacienteServer -> carrega pacientes referidos para farmac
+#'
 #' @param con.postgres  obejcto de conexao com BD iDART
 #' @param df.patientidentifier informacao dos pacientes (accountstatus, cellphone, dateofbirth, clinic, firstnames, homephone, lastname, modified, patientid, province, sex, workphone, address1, address2, address3, nextofkinname, nextofkinphone, race, uuid, uuidopenmrs)
 #' @return TRUE/FALSE
-#' @examples 
-#' 
-#' 
+#' @examples
+#'
+#'
 receberPacienteServer <- function(con.postgres,df.pacientesporreferir){
-  
-  
-  status <- tryCatch({
-    
-    
-    status = dbWriteTable(con.postgres, "sync_temp_patients", df.pacientesporreferir ,append=TRUE, row.names=FALSE)
-    
-    return(status)
-  },
-  error = function(cond) {
-    
-    ## Coisas a fazer se ocorrer um erro 
-    
-    # imprimir msg na consola
-    message(cond$message)
-    
-    # guardar o log 
-    saveLogError(us.name = farmac_name,
-                 event.date = as.character(Sys.time()),
-                 action = 'insertPatientIdentifier -> insere pacientes na tabela patientidentifier ',
-                 error = as.character(cond$message) )  
-    
-    #Choose a return value in case of error
-    return(FALSE)
-  },
-  finally = {
-    # NOTE:
-    # Here goes everything that should be executed at the end,
-    # Do nothing
-  })
-  
-  
-  status
-  
-  
-  
-  
-  
-}
-
-
-
-
-#' referirPacientes -> envia pacientesreferidos  da US para o servidor 
-#' 
-#' @param con.postgres  obejcto de conexao com BD iDART
-#' @param df.patientidentifier informacao dos pacientes (accountstatus, cellphone, dateofbirth, clinic, firstnames, homephone, lastname, modified, patientid, province, sex, workphone, address1, address2, address3, nextofkinname, nextofkinphone, race, uuid, uuidopenmrs)
-#' @return TRUE/FALSE
-#' @examples 
-#' 
-#' 
-referirPacientes <- function(con.postgres,df.pacientesporreferir){
-  
-  
-  status <- tryCatch({
-    
-    
-    status = dbWriteTable(con.postgres, "sync_temp_patients", df.pacientesporreferir ,append=TRUE, row.names=FALSE)
-    
-    return(status)
-  },
-  error = function(cond) {
-    
-    ## Coisas a fazer se ocorrer um erro 
-    
-    # imprimir msg na consola
-    message(cond$message)
-    
-    # guardar o log 
-    saveLogError(us.name = farmac_name,
-                 event.date = as.character(Sys.time()),
-                 action = 'insertPatientIdentifier -> insere pacientes na tabela patientidentifier ',
-                 error = as.character(cond$message) )  
-    
-    #Choose a return value in case of error
-    return(FALSE)
-  },
-  finally = {
-    # NOTE:
-    # Here goes everything that should be executed at the end,
-    # Do nothing
-  })
-  
-  
-  status
-  
-  
-  
-  
-  
+ 
+ 
+ status <- tryCatch({
+   
+   
+   status = dbWriteTable(con.postgres, "sync_temp_patients", df.pacientesporreferir ,append=TRUE, row.names=FALSE)
+   
+   return(status)
+ },
+ error = function(cond) {
+   
+   ## Coisas a fazer se ocorrer um erro
+   
+   # imprimir msg na consola
+   message(cond$message)
+   
+   # guardar o log
+   saveLogError(us.name = farmac_name,
+                event.date = as.character(Sys.time()),
+                action = 'insertPatientIdentifier -> insere pacientes na tabela patientidentifier ',
+                error = as.character(cond$message) )  
+   
+   #Choose a return value in case of error
+   return(FALSE)
+ },
+ finally = {
+   # NOTE:
+   # Here goes everything that should be executed at the end,
+   # Do nothing
+ })
+ 
+ 
+ status
+ 
+ 
+ 
+ 
+ 
 }
