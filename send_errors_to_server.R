@@ -59,7 +59,7 @@
             
             if (!status) {
               # salvar o ficheiro dos logs das dispensas
-              save(logErro, file = 'logs\\logDispensa.RData')
+              save(logErro, file = 'logs\\logErro.RData')
               
             } else{
               message('Log erros enviados com sucesso')

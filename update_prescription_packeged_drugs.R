@@ -49,7 +49,7 @@ if(!is.logical(con_local)){
       
       
       all_patient_dispenses_dups <- all_patient_dispenses[duplicated(as.Date(all_patient_dispenses$dispensedate)),]
-
+      
       
       # Todas linhas sao prescicao unica ( paciente levou um frasco)
       if(nrow(all_patient_dispenses_dups)==0){
@@ -63,7 +63,7 @@ if(!is.logical(con_local)){
           if(patient_id==0){
             save(logErro,file='logs\\logErro.RData')
             message ("paciente nao existe na BD local  gravar um erro . e passar para o proxmo") 
-            break
+            next
           }
           #####################################################################
           ## ******  Provider ID
@@ -309,7 +309,7 @@ if(!is.logical(con_local)){
           # Processa as dispensas de cada data
           patient_dispense <- patient_dispenses[which(as.Date(patient_dispenses$dispensedate)==vec_dates[v]), ]
           
-
+          
           
           ## ******  Regime ID
           ############################################################################

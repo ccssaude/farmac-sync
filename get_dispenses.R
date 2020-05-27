@@ -238,6 +238,7 @@ if(! is.logical(con_farmac) ){
                     if(status){
                       # salvar o ficheiro dos logs das dispensas
                       save(log_dispensas,file = 'logs\\logDispensa.RData')
+                      source('send_errors_to_server.R')
                       
                     } else{
                       # salvar o ficheiro logs das dispensas & dos erros

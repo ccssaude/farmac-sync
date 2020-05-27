@@ -114,7 +114,7 @@ if(!is.logical(con_openmrs)){
             
             if(status){
               
-              message(paste0(" Fila do paciente inserido no openmrs: ", nid, " - ",patient[2], " ", patient[3] ))
+              print(paste0(" Fila do paciente inserido no openmrs: ", nid, " - ",patient[2], " ", patient[3] ))
               dbSendQuery(con_local, paste0("update sync_temp_dispense set openmrs_status = 'yes' 
                                           where dispensedate::date ='",as.Date(packagedruginfotmp_to_save$dispensedate),
                                             "' and patientid ='",
@@ -123,7 +123,7 @@ if(!is.logical(con_openmrs)){
               
               
             } else {
-              message(paste0(" Erro ao inserir filao no openmrs: ", nid, " - ",patient[2], " ", patient[3] ))
+              print(paste0(" Erro ao inserir filao no openmrs: ", nid, " - ",patient[2], " ", patient[3] ))
             }
             
             
@@ -131,7 +131,7 @@ if(!is.logical(con_openmrs)){
           } 
           
           
-        }
+        } else {message(paste0("  paciente nao existe  no openmrs: ", nid, " - ",patient[2], " ", patient[3] ))}
         
         
       } 
