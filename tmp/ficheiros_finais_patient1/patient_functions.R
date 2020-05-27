@@ -215,7 +215,7 @@ refferPatients <- function(con.farmac, reffered.patients) {
 saveLogError <- function (us.name, event.date, action, error){
   
   # insere a linha de erro no log
-  logErro  <<-  add_row(logErro,us = us.name, data_evento =event.date, accao =action, Erro= error)
+  logErro  <<-  add_row(logErro,us = us.name, data_evento =event.date, accao =action, erro= error)
   
 }
 

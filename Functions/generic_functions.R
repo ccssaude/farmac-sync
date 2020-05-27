@@ -1168,8 +1168,8 @@ getRegimeID <- function(df.regimes ,regime.name) {
 
 getLinhaID <- function(df.linhas,linha) {
   
-  id <- df.linhas$linhaid[which(df.linhas$linhanome==linha)]
-  id
+  #id <- df.linhas$linhaid[which(df.linhas$linhanome==linha)]
+  return(40323)
 }
   
 #' getDrug -> Busca o drug pelo nome
@@ -1385,8 +1385,9 @@ composePrescription <- function(df.dispense,linha.id, regime.id,provider.id, pat
  
   load('config\\prescription.Rdata')
 
-
-  precription <- add_row( precription,
+  temp <- precription
+  
+  temp <- add_row( temp,
                          clinicalstage      =0,
                          current            = 'T',
                          weight             = 0,
@@ -1419,7 +1420,7 @@ composePrescription <- function(df.dispense,linha.id, regime.id,provider.id, pat
                          id                 = prescription.id)
  
    
-     return(precription)
+     return(temp)
 
   
 }
