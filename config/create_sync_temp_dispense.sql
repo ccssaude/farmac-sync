@@ -18,6 +18,9 @@ alter  TABLE public.sync_temp_dispense add column imported   character varying(2
 ALTER TABLE public.sync_temp_dispense  DROP CONSTRAINT IF EXISTS sync_temp_dispense_pkey;
 alter  TABLE public.sync_temp_dispense add column openmrs_status  character varying(255) default null;
 alter  TABLE public.sync_temp_dispense add column send_openmrs character varying(255) default null;
+
+
+
 -- executar check_sync_temp_dispense_on_packagesR
 
 -- Alteracoes FARMAC SERVER

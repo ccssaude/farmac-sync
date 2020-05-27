@@ -4,7 +4,7 @@
 
 rm(list=setdiff(ls(), c("wd", "is.farmac") ))
 
-source('Functions/patient_functions.R') 
+source('C:\\farmac-sync\\config\\config_properties.R') 
 ########################################################### 
 
 # verifica se as conexoes foram criadas com sucesso is.logical(con_farmac) =FALSE
@@ -26,19 +26,27 @@ if(!is.logical(con_farmac) & !is.logical(con_local)){
   if(exists('patient_local') && exists('patient_server')){
     
     #este datafrane busca todos pacientes que estao nao unidade sanitaria mas nao estao no servidor central
-    novos_patients_por_referir = anti_join(patient_local, patient_server, by="patientid")
+    
+    if(nrow(patient_server)>0){
+      
+      novos_patients_por_referir = anti_join(patient_local, patient_server, by="patientid") 
+      
+    } else {
+      novos_patients_por_referir <- patient_local
+    }
     
     #esta linha de codigo, converte o campo datebirth para um formato reconhecido pela maquina
     #novos_patients_por_referir$dateofbirth=format(novos_patients_por_referir$dateofbirth, "%Y-%m-%d %H:%M:%S")
     
     #por fim esta linha manda apenas os pacientes referidos para o servidor central
-    stutus = dbWriteTable(con_farmac, 'sync_temp_patients', novos_patients_por_referir, append=TRUE, row.names=FALSE)
+    status = referirPacientes(con_farmac,novos_patients_por_referir )
+    
     if(status){
       
       message(paste0(nrow(novos_patients_por_referir), " Foram enviados ao sevidor"))
     } else{
       
-      save(logErro,file = 'logs/logErro.RData')
+      save(logErro,file = 'logs\\logErro.RData')
       
       message( "Tente novamente.Eerro ao enviar pacientes ao servidor ... Houve problema de conexao..." )
     }
@@ -47,20 +55,20 @@ if(!is.logical(con_farmac) & !is.logical(con_local)){
     
   } else {
     
-    save(logErro,file = 'logs/logErro.RData')
+    save(logErro,file = 'logs\\logErro.RData')
     
     message( "Houve problema de conexao..." )
     ## gravar os logs
     ## programar uma funcao  para enviar os logs novos (com base na data)
-
+    
   }
   
   
-
+  
   
 }else{
   
-  save(logErro,file = 'logs/logErro.RData')
+  save(logErro,file = 'logs\\logErro.RData')
   
   message( "Houve problema de conexao..." )
   ## gravar os logs

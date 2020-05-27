@@ -3,11 +3,11 @@
 ##  **  local (localhost)
 library(RPostgreSQL)
 
-wd <- '~/Git/farmac-sync/'
+wd <- 'C:\\farmac-sync\\'
 
 
-# Set to TRUE/FALSE
-is.farmac <- TRUE                                    # definir se o codigo vai executar na farmac ou nao
+# Set to TRUE\\FALSE
+is.farmac <- FALSE                                    # definir se o codigo vai executar na farmac ou nao
 
 
 farmac.postgres.user ='farmac'                         # ******** modificar
@@ -19,7 +19,7 @@ farmac.postgres.port=5455                              # ******** modificar
 
 local.postgres.user ='postgres'                         # ******** modificar
 local.postgres.password='postgres'                      # ******** modificar
-local.postgres.db.name='farmac_magoanine'                          # ******** modificar
+local.postgres.db.name='albazine'                          # ******** modificar
 local.postgres.host='172.18.0.3'                        # ******** modificar
 local.postgres.port=5432                                # ******** modificar
 
@@ -31,7 +31,7 @@ local.postgres.port=5432                                # ******** modificar
 #' 
 #' @param files  nomes dos ficheiros
 #'  @param dir  directorio onde ficam os files
-#' @return TRUE/FALSE
+#' @return TRUE\\FALSE
 #' @examples
 #' default_loc = getOpenmrsDefaultLocation(con_openmrs)
 checkScriptsExists <- function (files, dir){
@@ -53,17 +53,17 @@ if (dir.exists(wd)){
   
   setwd(wd)  
   
-if(checkScriptsExists(files = c('config/config_properties.R','get_dispenses.R','send_dispenses.R'),dir = wd)){
+if(checkScriptsExists(files = c('config\\config_properties.R','\\get_dispenses.R','\\send_dispenses.R'),dir = wd)){
   
   
   
-  source('Functions/dispense_functions.R')  ## Carregar funcoes
-  source('Functions/generic_functions.R')             ## Carregar funcoes
-  source('Functions/patient_functions.R')          ## Carregar funcoes
-  
+  source('Functions\\dispense_functions.R')  ## Carregar funcoes
+  source('Functions\\generic_functions.R')             ## Carregar funcoes
+  source('Functions\\patient_functions.R')          ## Carregar funcoes
+
   # Load logs df
-  load('logs/logErro.RData')
-  load('logs/logDispensa.RData') 
+  load('logs\\logErro.RData')
+  load('logs\\logDispensa.RData') 
 
 
     # Objecto de connexao com a bd openmrs postgreSQL
@@ -94,7 +94,7 @@ if(checkScriptsExists(files = c('config/config_properties.R','get_dispenses.R','
       ## Houve problema de conexao...
       ## gravar os logs
       message("Algo correu mal, veja os erros na console")
-      save(logErro,file = 'logs/logErro.RData')
+      save(logErro,file = 'logs\\logErro.RData')
       stop('Algo correu mal, veja os erros na console')
       #rm(list=setdiff(ls(), c("wd", "is.farmac",) ))
 } 
@@ -105,7 +105,7 @@ if(checkScriptsExists(files = c('config/config_properties.R','get_dispenses.R','
     ## gravar os logs
     
     message("Algo correu mal, veja os erros na console")
-    save(logErro,file = 'logs/logErro.RData')
+    save(logErro,file = 'logs\\logErro.RData')
     rm(list=setdiff(ls(), c("wd", "is.farmac") ))
     stop('Algo correu mal, veja os erros na console')
   } 

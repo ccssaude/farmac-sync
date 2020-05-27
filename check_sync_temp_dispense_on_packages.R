@@ -5,21 +5,21 @@
 
 rm(list=setdiff(ls(), c("wd", "is.farmac") ))
 
-source('config/config_properties.R')     
+source('C:\\farmac-sync\\config\\config_properties.R')      
 
 # buscar todas dispensas para actualziar aquelas que ja foram inseridas no openmrs
 
-    # get local dispenses
-  dispenses_to_send_openmrs <- getLocalSyncTempDispense(con_local )
-  dispenses_to_send_openmrs <- dispenses_to_send_openmrs[which(dispenses_to_send_openmrs$sync_temp_dispenseid =="CS ALBASINE"),]
+# get local dispenses
+dispenses_to_send_openmrs <- getLocalSyncTempDispense(con_local )
+dispenses_to_send_openmrs <- dispenses_to_send_openmrs[which(dispenses_to_send_openmrs$sync_temp_dispenseid =="CS ALBASINE"),]
 
-  
+
 ########################################################### 
 
 ##  actualiza todas sync_temp_dispense que ja foram inseridas na BD de modo a evitar duplicacoes de packages
 
 all_packages <-  dbGetQuery(  con_local , 'select dispensedate, patientid from packagedruginfotmp ;'
-  )
+)
 
 dispenses_to_fix  <-  dispenses_to_send_openmrs %>% arrange(patientid,desc(pickupdate)) 
 # dispenses_to_fix <- distinct(dispenses_to_fix,as.Date(dispensedate), drugname, patientid , .keep_all = TRUE )
@@ -33,9 +33,9 @@ for (v in 1:length(all_patient_nids)) {
   nid = all_patient_nids[v]
   packages <- all_packages[which(all_packages$patientid == nid), ]
   packages$dispensedate <- as.Date(packages$dispensedate)
-
+  
   dates_to_fix <- sort (dispenses_to_fix$dispensedate[which(dispenses_to_fix$patientid==nid)], decreasing = TRUE)
-
+  
   for (i in 1:length(dates_to_fix)) {
     
     dispense_date <- dates_to_fix[i]
@@ -137,11 +137,11 @@ for (v in 1:length(all_patient_nids)) {
       # }
       
       
-     #######################################}
+      #######################################}
+      
+      
+    }
     
     
   }
-
-  
-  }
- }
+}

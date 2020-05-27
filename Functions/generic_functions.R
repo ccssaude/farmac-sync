@@ -17,7 +17,7 @@ library(stringr)
 #' 
 getFarmacServerCon <- function(){
   
-
+  
   status <- tryCatch({
     
     
@@ -25,7 +25,7 @@ getFarmacServerCon <- function(){
     message(paste0( "Postgres - conectando-se ao servidor FARMAC : ",
                     farmac.postgres.host, ' - db:',farmac.postgres.db.name, "...") )
     
-
+    
     
     # Objecto de connexao com a bd openmrs postgreSQL
     con_postgres <-  dbConnect(PostgreSQL(),user = farmac.postgres.user,
@@ -63,8 +63,8 @@ getFarmacServerCon <- function(){
                    action = ' getFarmacServerCon -> Estabelece uma conexao com o servidor central - Farmac',
                    error =as.character(cond$message) ) 
     }
- 
-  
+    
+    
     #Choose a return value in case of error
     return(FALSE)
   },
@@ -90,7 +90,7 @@ getFarmacServerCon <- function(){
 #' 
 getLocalServerCon <- function(){
   
-
+  
   status <- tryCatch({
     
     
@@ -136,7 +136,7 @@ getLocalServerCon <- function(){
     #}
     
     
- 
+    
     return(FALSE)
   },
   finally = {
@@ -349,7 +349,7 @@ sendLogDispense <- function(con_postgres , df.logdispense ){
                      action = 'sendLogDispense -> Envia log de dispensas da farmac para o servidor Farmac',
                      error = as.character(cond$message) )  
       }
-
+      
       
       return(FALSE)
       
@@ -364,7 +364,7 @@ sendLogDispense <- function(con_postgres , df.logdispense ){
       
       
     }
-
+    
   },
   finally = {
     # NOTE:
@@ -724,7 +724,7 @@ getLogDispenseFromServer <- function(con.farmac, clinic.name) {
       
     }
     
-
+    
     #Choose a return value in case of error
     return(FALSE)
   },
@@ -823,7 +823,7 @@ getLogErrorFromServer <- function(con.farmac, clinic.name) {
                    error = as.character(cond$message) )  
     }
     
-
+    
     
     #Choose a return value in case of error
     return(FALSE)
@@ -835,7 +835,7 @@ getLogErrorFromServer <- function(con.farmac, clinic.name) {
     # imprimir msg na consola
     message(cond$message)
     
-
+    
     
     # Se for um waring em que nao foi possivel buscar os dados guardar no log e return FALSE
     if(grepl(pattern = 'Could not create execute',x = cond$message,ignore.case = TRUE)){
@@ -896,9 +896,9 @@ getMainClinicName <- function(con.local) {
   
   
   clinic_name   <- dbGetQuery( con.local ,"select clinicname from clinic where mainclinic = TRUE ; " )
-    
-    return(clinic_name$clinicname[1])
- 
+  
+  return(clinic_name$clinicname[1])
+  
   
 }
 
@@ -957,12 +957,12 @@ getLinhas <- function(con.local) {
   
   
   linha   <- dbGetQuery( con.local ,paste0("select * from linhat ; " ) )
-
+  
   return(linha)
-
+  
 }
 
- 
+
 #' getPatientInfo -> Busca o id , nid , nomes e uuid de todos pacientes do iDART
 #'
 #' @param con.local  obejecto de conexao com BD iDART
@@ -991,12 +991,12 @@ getPatientInfo <- function(con.local) {
   dfTemp <-  patients[which(grepl(   pattern = "TR", ignore.case = TRUE,  x = patients$patientid  ) == TRUE), ]
   dfTemp_2 <- patients[which(grepl(  pattern = "VIS",ignore.case = TRUE,  x = patients$patientid ) == TRUE), ]
   dfTemp_3 <- patients[which(grepl( pattern = "VIA",  ignore.case = TRUE,  x = patients$patientid  ) == TRUE), ]
-
+  
   
   patients <-  patients[which(!patients$patientid %in% dfTemp$patientid), ]
   patients <-    patients[which(!patients$patientid %in% dfTemp_2$patientid), ]
   patients <-  patients[which(!patients$patientid %in% dfTemp_3$patientid), ]
-
+  
   
   rm(dfTemp_2, dfTemp, dfTemp_3)
   
@@ -1018,7 +1018,7 @@ getLastPackageDrugInfoTmpID <- function(con.local) {
   
   
   id    <- dbGetQuery( con.local ,
-                          paste0("SELECT id  FROM packagedruginfotmp order by id desc limit 1 ; " ))
+                       paste0("SELECT id  FROM packagedruginfotmp order by id desc limit 1 ; " ))
   
   if(nrow(id)>0){
     return(as.numeric(id$id[1]))
@@ -1043,8 +1043,8 @@ getLastKnownRegimeID <- function(con.local,patient.id) {
   
   regime   <- dbGetQuery( con.local ,
                           paste0("SELECT regimeid  FROM prescription where patient = ",
-                          as.numeric(patient.id),
-                          " order by date desc limit 1; " ))
+                                 as.numeric(patient.id),
+                                 " order by date desc limit 1; " ))
   
   if(nrow(regime)>0){
     return(regime)
@@ -1070,7 +1070,7 @@ getLastPrescriptionID <- function(con.local) {
   
   
   prescriptionid   <- dbGetQuery( con.local ,
-                          paste0("SELECT id  FROM prescription order by id desc limit 1; " ))
+                                  paste0("SELECT id  FROM prescription order by id desc limit 1; " ))
   
   if(nrow(prescriptionid)>0){
     return(as.numeric(prescriptionid$id[1]))
@@ -1093,7 +1093,7 @@ getLastPrescriptionID <- function(con.local) {
 getLastPrescribedDrugID <- function(con.local) {
   
   
-     prescribeddrug   <- dbGetQuery( con.local ,
+  prescribeddrug   <- dbGetQuery( con.local ,
                                   paste0("SELECT id  FROM prescribeddrugs order by id desc limit 1; " ))
   
   if(nrow(prescribeddrug)>0){
@@ -1149,7 +1149,7 @@ getRegimeID <- function(df.regimes ,regime.name) {
       } else {
         return(0)
       }
-
+      
     } else { # pega o ulimo regime conhecido (ideia do colaco kkkk)
       return(0)
     }
@@ -1168,10 +1168,10 @@ getRegimeID <- function(df.regimes ,regime.name) {
 
 getLinhaID <- function(df.linhas,linha) {
   
-  id <- df.linhas$linhaid[which(df.linhas$linhanome==linha)]
-  id
+  #id <- df.linhas$linhaid[which(df.linhas$linhanome==linha)]
+  return(40323)
 }
-  
+
 #' getDrug -> Busca o drug pelo nome
 #'
 #' @param df.drugs  df com todos drugs T
@@ -1198,17 +1198,17 @@ getDrug<- function(df.drugs,drug.name) {
     second_index <- stri_locate_first(drug.name, regex = "\\]")[[1]]
     dosage <- sub(".*(\\d+{2}).*$", "\\1", drug.name)
     
-     abreviatura_drug <- substr(drug.name, first_index+1, second_index-1 )
-     
-     drug = subset(df.drugs, grepl(pattern = abreviatura_drug,x = df.drugs$name,ignore.case = TRUE),)
-     if(nrow(drug)==1){
-       return(drug)
-     } else if(nrow(drug)>1){
-       drug = subset(df.drugs, grepl(pattern = abreviatura_drug,x = df.drugs$name,ignore.case = TRUE) & df.drugs$pediatric=='F' ,)
-       return(drug[1,])
-     } else { # pega qualquer (ideia do colaco kkkk)
-       return(df.drugs[1,])
-     }
+    abreviatura_drug <- substr(drug.name, first_index+1, second_index-1 )
+    
+    drug = subset(df.drugs, grepl(pattern = abreviatura_drug,x = df.drugs$name,ignore.case = TRUE),)
+    if(nrow(drug)==1){
+      return(drug)
+    } else if(nrow(drug)>1){
+      drug = subset(df.drugs, grepl(pattern = abreviatura_drug,x = df.drugs$name,ignore.case = TRUE) & df.drugs$pediatric=='F' ,)
+      return(drug[1,])
+    } else { # pega qualquer (ideia do colaco kkkk)
+      return(df.drugs[1,])
+    }
   }
 }
 
@@ -1293,77 +1293,77 @@ getPatientId <- function(df.temp.patients,patient) {
   
   nid <- patient[1]
   
- id <- df.temp.patients$id[which(df.temp.patients$patientid==nid)][1]
- if(is.na(id)){
-   id <- df.temp.patients$id[which(df.temp.patients$value==nid)][1]
-   if(is.na(id)){
-     pat <- subset(df.temp.patients,firstnames==patient[2]  & lastname ==patient[3])
-     if(nrow(pat)==1){
-       id <- pat$id[1]
-       return(id)
-       
-     } else if(nrow(pat)>1){# paciente duplicado
-       
-       if(pat$uuid[1]==pat$uuid[2]){ # sao pacientes iguais, considere o primeiro
-         
-         id <- pat$id[1]
-         
-         if(pat$uuid[1]==pat$uuid[2]){
-           
-           # historico clinico de pacientes : Novo Paciente   ->  Referido para outra Farmacia  ->  Voltou da Referencia 
+  id <- df.temp.patients$id[which(df.temp.patients$patientid==nid)][1]
+  if(is.na(id)){
+    id <- df.temp.patients$id[which(df.temp.patients$value==nid)][1]
+    if(is.na(id)){
+      pat <- subset(df.temp.patients,firstnames==patient[2]  & lastname ==patient[3])
+      if(nrow(pat)==1){
+        id <- pat$id[1]
+        return(id)
+        
+      } else if(nrow(pat)>1){# paciente duplicado
+        
+        if(pat$uuid[1]==pat$uuid[2]){ # sao pacientes iguais, considere o primeiro
           
-         } else {  # sao pacientes duplicados
-           
-           if(is.farmac){
-             
-             saveLogError( us.name = farmac_name,    event.date =as.character(Sys.Date()),
-                           action = 'getPatientId -> Busca o id do paciente',
-                           error =  paste0('ERR_DUP Paciente FARMAC duplicado - ',pat$patientid[1])      )
-           } else {
-             saveLogError( us.name = main_clinic_name,    event.date = as.character(Sys.Date()),
-                           action = 'getPatientId -> Busca o id do paciente',
-                           error =  paste0('ERR_DUP Paciente FARMAC duplicado - ',pat$patientid[1])      )
-           }
-           
-           
-           
-         }
-
-         
-         return(id)
-         
-       } else {
-         
-         
-         if(is.farmac){
-           
-           saveLogError( us.name = farmac_name,    event.date =as.character(Sys.Date()),
-                         action = 'getPatientId -> Busca o id do paciente',
-                         error =  paste0('ERR_DUP Paciente FARMAC duplicado - ',pat$patientid[1])      )
-         } else {
-           saveLogError( us.name = main_clinic_name,    event.date = as.character(Sys.Date()),
-                         action = 'getPatientId -> Busca o id do paciente',
-                         error =  paste0('ERR_DUP Paciente FARMAC duplicado - ',pat$patientid[1])      )
-         }
-         
-         return(0)  # error
-         
-       }
-
-         
-     } else {
-       
-       return(0)  # no patient found
-     }
-     
-   } else{
-       return(id)
-     }
-
- }else{
-   return(id)
- }
-
+          id <- pat$id[1]
+          
+          if(pat$uuid[1]==pat$uuid[2]){
+            
+            # historico clinico de pacientes : Novo Paciente   ->  Referido para outra Farmacia  ->  Voltou da Referencia 
+            
+          } else {  # sao pacientes duplicados
+            
+            if(is.farmac){
+              
+              saveLogError( us.name = farmac_name,    event.date =as.character(Sys.Date()),
+                            action = 'getPatientId -> Busca o id do paciente',
+                            error =  paste0('ERR_DUP Paciente FARMAC duplicado - ',pat$patientid[1])      )
+            } else {
+              saveLogError( us.name = main_clinic_name,    event.date = as.character(Sys.Date()),
+                            action = 'getPatientId -> Busca o id do paciente',
+                            error =  paste0('ERR_DUP Paciente FARMAC duplicado - ',pat$patientid[1])      )
+            }
+            
+            
+            
+          }
+          
+          
+          return(id)
+          
+        } else {
+          
+          
+          if(is.farmac){
+            
+            saveLogError( us.name = farmac_name,    event.date =as.character(Sys.Date()),
+                          action = 'getPatientId -> Busca o id do paciente',
+                          error =  paste0('ERR_DUP Paciente FARMAC duplicado - ',pat$patientid[1])      )
+          } else {
+            saveLogError( us.name = main_clinic_name,    event.date = as.character(Sys.Date()),
+                          action = 'getPatientId -> Busca o id do paciente',
+                          error =  paste0('ERR_DUP Paciente FARMAC duplicado - ',pat$patientid[1])      )
+          }
+          
+          return(0)  # error
+          
+        }
+        
+        
+      } else {
+        
+        return(0)  # no patient found
+      }
+      
+    } else{
+      return(id)
+    }
+    
+  }else{
+    return(id)
+  }
+  
 }
 
 
@@ -1382,45 +1382,46 @@ getPatientId <- function(df.temp.patients,patient) {
 #' 
 
 composePrescription <- function(df.dispense,linha.id, regime.id,provider.id, patient.id, nid,prescription.id) {
- 
-  load('config/prescription.Rdata')
-
-
-  precription <- add_row( precription,
-                         clinicalstage      =0,
-                         current            = 'T',
-                         weight             = 0,
-                         date               = df.dispense$date[1],
-                         doctor             =provider.id,
-                         duration           =  df.dispense$duration[1],
-                         modified           =   df.dispense$modified[1],
-                         patient            = patient.id,
-                         prescriptionid     =    paste0(nid, '-', gsub(pattern = ' ',replacement = '_', x =df.dispense$date[1] ),"_Farmac"  )  ,
-                         reasonforupdate    = df.dispense$reasonforupdate[1],
-                         notes              = paste0( 'FARMAC-',gsub (pattern = 'NA',replacement = '',x = df.dispense$notes[1])), 
-                         enddate            = df.dispense$enddate[1],    
-                         drugtypes          = df.dispense$drugtypes[1],    
-                         regimeid           = regime.id,
-                         datainicionoutroservico = df.dispense$datainicionoutroservico[1],  
-                         motivomudanca      = df.dispense$motivomudanca[1], 
-                         linhaid            = linha.id,
-                         dispensatrimestral = df.dispense$dispensatrimestral[1],
-                         ppe                = df.dispense$ppe[1],   
-                         ptv                = df.dispense$ptv[1],  
-                         tb                 = df.dispense$tb[1],  
-                         tpi                = df.dispense$tpi[1],   
-                         tpc                = df.dispense$tpc[1],
-                         gaac              = df.dispense$gaac[1], 
-                         af                 = df.dispense$af[1],    
-                         ca                 = df.dispense$ca[1],         
-                         ccr                = df.dispense$ccr[1], 
-                         saaj               = df.dispense$saaj[1],   
-                         fr                 = df.dispense$fr[1] ,
-                         id                 = prescription.id)
- 
-   
-     return(precription)
-
+  
+  load('config\\prescription.Rdata')
+  
+  temp <- precription
+  
+  temp <- add_row( temp,
+                   clinicalstage      =0,
+                   current            = 'T',
+                   weight             = 0,
+                   date               = df.dispense$date[1],
+                   doctor             =provider.id,
+                   duration           =  df.dispense$duration[1],
+                   modified           =   df.dispense$modified[1],
+                   patient            = patient.id,
+                   prescriptionid     =    paste0(nid, '-', gsub(pattern = ' ',replacement = '_', x =df.dispense$date[1] ),"_Farmac"  )  ,
+                   reasonforupdate    = df.dispense$reasonforupdate[1],
+                   notes              = paste0( 'FARMAC-',gsub (pattern = 'NA',replacement = '',x = df.dispense$notes[1])), 
+                   enddate            = df.dispense$enddate[1],    
+                   drugtypes          = df.dispense$drugtypes[1],    
+                   regimeid           = regime.id,
+                   datainicionoutroservico = df.dispense$datainicionoutroservico[1],  
+                   motivomudanca      = df.dispense$motivomudanca[1], 
+                   linhaid            = linha.id,
+                   dispensatrimestral = df.dispense$dispensatrimestral[1],
+                   ppe                = df.dispense$ppe[1],   
+                   ptv                = df.dispense$ptv[1],  
+                   tb                 = df.dispense$tb[1],  
+                   tpi                = df.dispense$tpi[1],   
+                   tpc                = df.dispense$tpc[1],
+                   gaac              = df.dispense$gaac[1], 
+                   af                 = df.dispense$af[1],    
+                   ca                 = df.dispense$ca[1],         
+                   ccr                = df.dispense$ccr[1], 
+                   saaj               = df.dispense$saaj[1],   
+                   fr                 = df.dispense$fr[1] ,
+                   id                 = prescription.id)
+  
+  
+  return(temp)
+  
   
 }
 
@@ -1438,12 +1439,12 @@ composePrescription <- function(df.dispense,linha.id, regime.id,provider.id, pat
 
 composePrescribedDrugs <- function(df.dispense, prescription.id) {
   
-  load('config/prescribeddrugs.RData')
- 
+  load('config\\prescribeddrugs.RData')
+  
   temp_prescribeddrugs <- prescribeddrugs
-    
+  
   for(i in 1:nrow(df.dispense)){
-
+    
     prescribed_drug_id <- getLastPrescribedDrugID(con_local)
     prescribed_drug_id <- prescribed_drug_id + sample(7:23, 1)*3 + 2*i ##  gerao aleatoria de ID apartir do ultimo
     
@@ -1458,16 +1459,16 @@ composePrescribedDrugs <- function(df.dispense, prescription.id) {
     prescribeddrugsindex = i -1
     
     temp_prescribeddrugs <- add_row(temp_prescribeddrugs,
-      amtpertime  =amt,
-      drug = drug$id[1]  ,
-      prescription = prescription.id,
-      timesperday =df.dispense$timesperday[i],
-      modified =  df.dispense$modified[i] ,
-      prescribeddrugsindex = prescribeddrugsindex,
-      id = prescribed_drug_id
-      )
+                                    amtpertime  =amt,
+                                    drug = drug$id[1]  ,
+                                    prescription = prescription.id,
+                                    timesperday =df.dispense$timesperday[i],
+                                    modified =  df.dispense$modified[i] ,
+                                    prescribeddrugsindex = prescribeddrugsindex,
+                                    id = prescribed_drug_id
+    )
     
-   # temp_prescribeddrugs <- rbind.fill(prescribeddrugs,temp_prescribeddrugs )
+    # temp_prescribeddrugs <- rbind.fill(prescribeddrugs,temp_prescribeddrugs )
   }
   
   return(temp_prescribeddrugs)
@@ -1486,8 +1487,8 @@ composePrescribedDrugs <- function(df.dispense, prescription.id) {
 
 composePackageOpenmrs <- function(df.packagedruginfotmp) {
   
-
-  load(file = 'config/package.RData' )
+  
+  load(file = 'config\\package.RData' )
   temp_package <- package
   temp_package <- add_column(temp_package,amount='')
   temp_package <- add_column(temp_package,customizedDosage='')
@@ -1500,7 +1501,7 @@ composePackageOpenmrs <- function(df.packagedruginfotmp) {
   drug_name <- df.packagedruginfotmp$drugname[i]
   drug <- getDrug(df.drugs =drugs,drug.name =drug_name)
   amt = 0 ## default
-
+  
   if(drug$packsize[1]>30){
     amt =2
   } else {
@@ -1508,9 +1509,9 @@ composePackageOpenmrs <- function(df.packagedruginfotmp) {
   }
   
   for (v in 1:nrow(df.packagedruginfotmp)) {
-
-      id_package <- 3*sample(11:19, 1) + 17*v  # random id generation
-      temp_package <- add_row(
+    
+    id_package <- 3*sample(11:19, 1) + 17*v  # random id generation
+    temp_package <- add_row(
       temp_package,
       id = id_package,
       dateleft = df.packagedruginfotmp$dispensedate[v],
@@ -1524,7 +1525,7 @@ composePackageOpenmrs <- function(df.packagedruginfotmp) {
       dosage = df.packagedruginfotmp$timesperday[v],
       customizedDosage = paste0('Tomar ', df.packagedruginfotmp$timesperday[v] , ' Comp', amt, ' vezes por dia' )
       
-   
+      
     )
     
   }
@@ -1547,7 +1548,7 @@ composePackageOpenmrs <- function(df.packagedruginfotmp) {
 composePackage <- function(df.packagedruginfotmp, prescription.to.save) {
   
   
-  load(file = 'config/package.RData')
+  load(file = 'config\\package.RData')
   temp_package <- package
   
   for (v in 1:nrow(df.packagedruginfotmp)) {
@@ -1576,9 +1577,9 @@ composePackage <- function(df.packagedruginfotmp, prescription.to.save) {
     )
     
     
-}
-
-return(temp_package)
+  }
+  
+  return(temp_package)
   
 }
 
@@ -1595,26 +1596,26 @@ return(temp_package)
 composePackagedDrugs <- function(df.packagedruginfotmp, package.to.save ) {
   
   # carrega df vazio packageddrugs
-  load(file = 'config/packageddrugs.RData')
+  load(file = 'config\\packageddrugs.RData')
   temp_packageddrugs <- packageddrugs
   
   for (v in 1:nrow(df.packagedruginfotmp)) {
-   
+    
     id_pd <- getLastPackagedDrugsID(con_local)
     id_pd <-  id_pd + 6*sample(11:16, 1) + 26*v  # random id generation
     packageddrugsindex <- v - 1
     
     temp_packageddrugs <- add_row(temp_packageddrugs,
-                            id = id_pd,
-                            amount = df.packagedruginfotmp$dispensedqty[v],
-                            parentpackage= package.to.save$id[v] ,
-                            stock=df.packagedruginfotmp$stockid[v],
-                            modified='T',
-                            packageddrugsindex = packageddrugsindex)
-
+                                  id = id_pd,
+                                  amount = df.packagedruginfotmp$dispensedqty[v],
+                                  parentpackage= package.to.save$id[v] ,
+                                  stock=df.packagedruginfotmp$stockid[v],
+                                  modified='T',
+                                  packageddrugsindex = packageddrugsindex)
+    
   }
- 
-return(temp_packageddrugs)
+  
+  return(temp_packageddrugs)
   
 }
 
@@ -1631,11 +1632,11 @@ return(temp_packageddrugs)
 
 composePackageDrugInfoTmp <- function(df.patient.dispenses, user.id) {
   
-  load(file = 'config/packagedruginfotmp.RData') 
+  load(file = 'config\\packagedruginfotmp.RData') 
   temp_packagedruginfotmp <- packagedruginfotmp
   
   for(i in 1:nrow(df.patient.dispenses)){
-  
+    
     # para cada drug associar um stock
     drug_name <- df.patient.dispenses$drugname[i]
     drug <- getDrug(df.drugs = drugs,drug_name )
@@ -1675,11 +1676,11 @@ composePackageDrugInfoTmp <- function(df.patient.dispenses, user.id) {
       notes = ""
     )
     
-
+    
   }
   
   return(temp_packagedruginfotmp)
-
+  
 }
 
 #' composePackageDrugInfoTmpOpenMRS -> compoe um dataframe de um package  para enviar para openmrs
@@ -1693,11 +1694,11 @@ composePackageDrugInfoTmp <- function(df.patient.dispenses, user.id) {
 #' 
 
 composePackageDrugInfoTmpOpenMRS <- function(df.patient.dispenses, user.id, regime.uuid) {
-
-  load(file = 'config/packagedruginfotmp.RData')
+  
+  load(file = 'config\\packagedruginfotmp.RData')
   
   temp_packagedruginfotmp <- packagedruginfotmp
-
+  
   temp_packagedruginfotmp <- temp_packagedruginfotmp[ , -which( names(temp_packagedruginfotmp)
                                                                 %in% c("batchnumber",
                                                                        'formlanguage1',
@@ -1721,17 +1722,17 @@ composePackageDrugInfoTmpOpenMRS <- function(df.patient.dispenses, user.id, regi
                                                                        'dispensedforlaterpickup',
                                                                        'qtyinlastbatch',
                                                                        'firstbatchinprintjob'
-                                                                       ))]
+                                                                ))]
   
   
-
-
+  
+  
   temp_packagedruginfotmp <- add_column(temp_packagedruginfotmp,customizedDosage='')
   temp_packagedruginfotmp <- add_column(temp_packagedruginfotmp,regimeuuid='')
   temp_packagedruginfotmp$dateexpectedstring <-as.Date(temp_packagedruginfotmp$dateexpectedstring)
-
+  
   for(i in 1:nrow(df.patient.dispenses)){
-
+    
     # para cada drug associar um stock
     drug_name <- df.patient.dispenses$drugname[i]
     drug <- getDrug(df.drugs = drugs,drug_name )
@@ -1745,7 +1746,7 @@ composePackageDrugInfoTmpOpenMRS <- function(df.patient.dispenses, user.id, regi
     if(as.integer(qty)>30){
       nr_toma <- 2
     }
-
+    
     temp_packagedruginfotmp <- add_row(
       temp_packagedruginfotmp,
       patientid = df.patient.dispenses$patientid[i],
@@ -1764,12 +1765,12 @@ composePackageDrugInfoTmpOpenMRS <- function(df.patient.dispenses, user.id, regi
       regimeuuid = regime.uuid,
       customizedDosage= paste0('Tomar ', df.patient.dispenses$timesperday[i],' Comp ',nr_toma,' vezes por dia')
     )
-
-
+    
+    
   }
-
+  
   return(temp_packagedruginfotmp)
-
+  
 }
 
 
@@ -1782,161 +1783,160 @@ composePackageDrugInfoTmpOpenMRS <- function(df.patient.dispenses, user.id, regi
 #' stock  <- getStockForDrug(con.postgres,drug.id)
 #' 
 
-  getStockForDrug <- function(con.postgres, drug.id) {
+getStockForDrug <- function(con.postgres, drug.id) {
   
- stock_list <- dbGetQuery(con.postgres, paste0("select * from stock where drug = ",
-                                           drug.id,
-                                          " order by expirydate ASC, datereceived ASC, id ASC"))
- 
- if(nrow(stock_list)==0){
-   
-   stock <- dbGetQuery(con.postgres, paste0("select * from  stock where hasunitsremaining='T'; "))
-   stock <- stock[1,]
- } else {
-   
-   stock = stock_list[1,]
- }
-
- 
- return(stock)
+  stock_list <- dbGetQuery(con.postgres, paste0("select * from stock where drug = ",
+                                                drug.id,
+                                                " order by expirydate ASC, datereceived ASC, id ASC"))
   
+  if(nrow(stock_list)==0){
+    
+    stock <- dbGetQuery(con.postgres, paste0("select * from  stock where hasunitsremaining='T'; "))
+    stock <- stock[1,]
+  } else {
+    
+    stock = stock_list[1,]
   }
   
   
+  return(stock)
   
-  
-  #' getAdminUser -> retorna a informacao do user admin no iDART
-  #' @param con.postgres  con com BD
-  #' @return admin 
-  #' @examples 
-  #' user_admin  <- getAdminUser(con.postgres)
-  #' 
-  
-  getAdminUser <- function(con.postgres) {
-    
-    admin <- dbGetQuery(con.postgres, paste0("select * from users where cl_username = 'admin' ;"))
-
-    
-    return(admin)
-    
-  }
-  
-  
-  #' ReadJdbcProperties ->  carrega os paramentros de conexao no ficheiro jdbc.properties
-  #' @param file  patg to file
-  #' @return  vec [urlBase,urlBaseReportingRest,location,hibernateOpenMRSConnectionUrl,hibernateOpenMRSPassword,hibernateOpenMRSUsername]
-  #' @examples 
-  #' user_admin  <- ReadJdbcProperties(file)
-  #' 
-  
-  readJdbcProperties <- function(file='config/jdbc.properties') {
+}
 
 
-    vec <- as.data.frame(read.properties(file = file ))
-    vec
-  }
-  
-  #' checkPatientUuidExistsOpenMRS ->  verifica se existe um paciente no openmrs com um det. uuidopenmrs
-  #' @param jdbc.properties  [urlBase,urlBaseReportingRest,location,hibernateOpenMRSConnectionUrl,hibernateOpenMRSPassword,hibernateOpenMRSUsername]
-  #' @return  TRUE/FALSE 
-  #' @examples 
-  #' status  <- checkPatientUuidExistsOpenMRS(jdbc.properties, c("0102010001/2006/04892","julia" ,"jaoquina", "cb90174b-81e9-43e4-9b4d-dc09d2966efa"))
-  #' 
-  
-  checkPatientUuidExistsOpenMRS <- function(jdbc.properties, patient) {
-    # url da API
-    base.url.rest <- as.character(jdbc.properties$urlBaseReportingRest)
-    base.url <-  as.character(jdbc.properties$urlBase)
-    status <- TRUE
-    url.check.patient <- paste0(base.url,'person/',patient[4])
-    
-    r <- content(GET(url.check.patient, authenticate('farmac', 'iD@rt2020!')), as = "parsed")
-    
-    if("error" %in% names(r)){
-      if(r$error$message =="Object with given uuid doesn't exist" ){
-        saveLogError(us.name = main_clinic_name,
-                     event.date = as.character(Sys.time()),
-                     action = paste0("sendFilaOpenMRS - ",patient[1],' - ', patient[4]),
-                     error ="Object with given uuid doesn't exist" )
-      }
-      status<-FALSE
-      return(FALSE)
-      
-    } else{
-      
-      return(status)
-      
-    }
-    
-    return(status)
-  }
-  
-  
-  #' sendFilaOpenMRS ->  envia fila para openmrs usanda a restAPI
-  #' @param file  patg to file
-  #' @return  vec [urlBase,urlBaseReportingRest,location,hibernateOpenMRSConnectionUrl,hibernateOpenMRSPassword,hibernateOpenMRSUsername]
-  #' @examples 
-  #' user_admin  <- ReadJdbcProperties(file)
-  #' 
-  
-  sendFilaOpenMRS <- function(jdbc.properties,df.patient, df.fila.info) {
-    
-    
-    encounterType = 'e279133c-1d5f-11e0-b929-000c29ad1d07' # FILA
-    providerUuid ="7013d271-1bc2-4a50-bed6-8932044bc18f" # generic provider
-    regimeUuid = "e1d83e4e-1d5f-11e0-b929-000c29ad1d07"
-    dispensedAmountUuid ="e1de2ca0-1d5f-11e0-b929-000c29ad1d07"
-    filaUuid = "49857ace-1a92-4980-8313-1067714df151"
-    dosageUuid= "e1de28ae-1d5f-11e0-b929-000c29ad1d07"
-    returnVisitUuid="e1e2efd8-1d5f-11e0-b929-000c29ad1d07"
-    
-    
-    encounterDatetime =as.Date(df.fila.info$dispensedate[1])
-    nidUuid = df.patient[4]
-    strRegimenAnswerUuid = df.fila.info$regimeuuid[1]
-    strFacilityUuid = as.character(jdbc_properties$location)
-    packSize =  df.fila.info$dispensedqty[1]
-    customizedDosage = df.fila.info$customizedDosage[1]
-    strNextPickUp = df.fila.info$dateexpectedstring[1]
-    
-    # url da API
-    base.url <-  as.character(jdbc.properties$urlBase)
-    base.url <- str_c(base.url,'encounter')
-    status <- TRUE
-  
-    
-    string <- str_c("{\"encounterDatetime\": \"" , encounterDatetime , "\", \"patient\": \""
-                    , nidUuid , "\", \"encounterType\": \"" , encounterType , "\", " , "\"location\":\""
-                    , strFacilityUuid , "\", \"form\":\"" , filaUuid , "\", \"encounterProviders\":[{\"provider\":\""
-                    , providerUuid , "\", \"encounterRole\":\"a0b03050-c99b-11e0-9572-0800200c9a66\"}], "
-                    , "\"obs\":[{\"person\":\"" , nidUuid , "\",\"obsDatetime\":\"" , encounterDatetime
-                    , "\",\"concept\":" , "\"" , regimeUuid , "\",\"value\":\"" , strRegimenAnswerUuid
-                    , "\", \"comment\":\"IDART\"},{\"person\":" , "\"" , nidUuid , "\",\"obsDatetime\":\""
-                    , encounterDatetime , "\",\"concept\":\"" , dispensedAmountUuid , "\"," , "\"value\":\"" , packSize
-                    , "\",\"comment\":\"IDART\"},{\"person\":\"" , nidUuid , "\",\"obsDatetime\":\"" , encounterDatetime
-                    , "\",\"concept\":" , "\"" , dosageUuid , "\",\"value\":\"" , customizedDosage
-                    , "\",\"comment\":\"IDART\"},{\"person\":\"" , nidUuid , "\"," , "\"obsDatetime\":\""
-                    , encounterDatetime , "\",\"concept\":\"" , returnVisitUuid , "\",\"value\":\"" , strNextPickUp
-                    , "\",\"comment\":\"IDART\"}]}")
-    
-    
 
-    r <- POST(url = base.url, body = string, config=authenticate('farmac', 'iD@rt2020!'),  add_headers("Content-Type"="application/json") )
-    
-    if(as.integer(r$status_code)==201 | as.integer(r$status_code) == 204){
-        message('Fila inserido no openmrs')
-      return(TRUE)
-    } else {
-      
-      message( paste0("Erro ao enviar fila do paciente: nid",df.patient[1], " - uuid:",df.patient[4] ))
+
+#' getAdminUser -> retorna a informacao do user admin no iDART
+#' @param con.postgres  con com BD
+#' @return admin 
+#' @examples 
+#' user_admin  <- getAdminUser(con.postgres)
+#' 
+
+getAdminUser <- function(con.postgres) {
+  
+  admin <- dbGetQuery(con.postgres, paste0("select * from users where cl_username = 'admin' ;"))
+  
+  
+  return(admin)
+  
+}
+
+
+#' ReadJdbcProperties ->  carrega os paramentros de conexao no ficheiro jdbc.properties
+#' @param file  patg to file
+#' @return  vec [urlBase,urlBaseReportingRest,location,hibernateOpenMRSConnectionUrl,hibernateOpenMRSPassword,hibernateOpenMRSUsername]
+#' @examples 
+#' user_admin  <- ReadJdbcProperties(file)
+#' 
+
+readJdbcProperties <- function(file='config\\jdbc.properties') {
+  
+  
+  vec <- as.data.frame(read.properties(file = file ))
+  vec
+}
+
+#' checkPatientUuidExistsOpenMRS ->  verifica se existe um paciente no openmrs com um det. uuidopenmrs
+#' @param jdbc.properties  [urlBase,urlBaseReportingRest,location,hibernateOpenMRSConnectionUrl,hibernateOpenMRSPassword,hibernateOpenMRSUsername]
+#' @return  TRUE/FALSE 
+#' @examples 
+#' status  <- checkPatientUuidExistsOpenMRS(jdbc.properties, c("0102010001/2006/04892","julia" ,"jaoquina", "cb90174b-81e9-43e4-9b4d-dc09d2966efa"))
+#' 
+
+checkPatientUuidExistsOpenMRS <- function(jdbc.properties, patient) {
+  # url da API
+  base.url.rest <- as.character(jdbc.properties$urlBaseReportingRest)
+  base.url <-  as.character(jdbc.properties$urlBase)
+  status <- TRUE
+  url.check.patient <- paste0(base.url,'person/',patient[4])
+  
+  r <- content(GET(url.check.patient, authenticate('farmac', 'iD@rt2020!')), as = "parsed")
+  
+  if("error" %in% names(r)){
+    if(r$error$message =="Object with given uuid doesn't exist" ){
       saveLogError(us.name = main_clinic_name,
                    event.date = as.character(Sys.time()),
-                   action = 'sendFilaOpenMRS',
-                   error = paste0("Erro ao enviar fila do paciente: nid",df.patient[1], " - uuid:",df.patient[4] ))
-      save(logErro,file = 'logs/logErro.RData')
-      print(as.character(r$error$message))
-      return(FALSE)
+                   action = paste0("sendFilaOpenMRS - ",patient[1],' - ', patient[4]),
+                   error ="Object with given uuid doesn't exist" )
     }
-
+    status<-FALSE
+    return(FALSE)
+    
+  } else{
+    
+    return(status)
+    
   }
   
+  return(status)
+}
+
+
+#' sendFilaOpenMRS ->  envia fila para openmrs usanda a restAPI
+#' @param file  patg to file
+#' @return  vec [urlBase,urlBaseReportingRest,location,hibernateOpenMRSConnectionUrl,hibernateOpenMRSPassword,hibernateOpenMRSUsername]
+#' @examples 
+#' user_admin  <- ReadJdbcProperties(file)
+#' 
+
+sendFilaOpenMRS <- function(jdbc.properties,df.patient, df.fila.info) {
+  
+  
+  encounterType = 'e279133c-1d5f-11e0-b929-000c29ad1d07' # FILA
+  providerUuid ="7013d271-1bc2-4a50-bed6-8932044bc18f" # generic provider
+  regimeUuid = "e1d83e4e-1d5f-11e0-b929-000c29ad1d07"
+  dispensedAmountUuid ="e1de2ca0-1d5f-11e0-b929-000c29ad1d07"
+  filaUuid = "49857ace-1a92-4980-8313-1067714df151"
+  dosageUuid= "e1de28ae-1d5f-11e0-b929-000c29ad1d07"
+  returnVisitUuid="e1e2efd8-1d5f-11e0-b929-000c29ad1d07"
+  
+  
+  encounterDatetime =as.Date(df.fila.info$dispensedate[1])
+  nidUuid = df.patient[4]
+  strRegimenAnswerUuid = df.fila.info$regimeuuid[1]
+  strFacilityUuid = as.character(jdbc_properties$location)
+  packSize =  df.fila.info$dispensedqty[1]
+  customizedDosage = df.fila.info$customizedDosage[1]
+  strNextPickUp = df.fila.info$dateexpectedstring[1]
+  
+  # url da API
+  base.url <-  as.character(jdbc.properties$urlBase)
+  base.url <- str_c(base.url,'encounter')
+  status <- TRUE
+  
+  
+  string <- str_c("{\"encounterDatetime\": \"" , encounterDatetime , "\", \"patient\": \""
+                  , nidUuid , "\", \"encounterType\": \"" , encounterType , "\", " , "\"location\":\""
+                  , strFacilityUuid , "\", \"form\":\"" , filaUuid , "\", \"encounterProviders\":[{\"provider\":\""
+                  , providerUuid , "\", \"encounterRole\":\"a0b03050-c99b-11e0-9572-0800200c9a66\"}], "
+                  , "\"obs\":[{\"person\":\"" , nidUuid , "\",\"obsDatetime\":\"" , encounterDatetime
+                  , "\",\"concept\":" , "\"" , regimeUuid , "\",\"value\":\"" , strRegimenAnswerUuid
+                  , "\", \"comment\":\"IDART\"},{\"person\":" , "\"" , nidUuid , "\",\"obsDatetime\":\""
+                  , encounterDatetime , "\",\"concept\":\"" , dispensedAmountUuid , "\"," , "\"value\":\"" , packSize
+                  , "\",\"comment\":\"IDART\"},{\"person\":\"" , nidUuid , "\",\"obsDatetime\":\"" , encounterDatetime
+                  , "\",\"concept\":" , "\"" , dosageUuid , "\",\"value\":\"" , customizedDosage
+                  , "\",\"comment\":\"IDART\"},{\"person\":\"" , nidUuid , "\"," , "\"obsDatetime\":\""
+                  , encounterDatetime , "\",\"concept\":\"" , returnVisitUuid , "\",\"value\":\"" , strNextPickUp
+                  , "\",\"comment\":\"IDART\"}]}")
+  
+  
+  
+  r <- POST(url = base.url, body = string, config=authenticate('farmac', 'iD@rt2020!'),  add_headers("Content-Type"="application/json") )
+  
+  if(as.integer(r$status_code)==201 | as.integer(r$status_code) == 204){
+    message('Fila inserido no openmrs')
+    return(TRUE)
+  } else {
+    
+    message( paste0("Erro ao enviar fila do paciente: nid",df.patient[1], " - uuid:",df.patient[4] ))
+    saveLogError(us.name = main_clinic_name,
+                 event.date = as.character(Sys.time()),
+                 action = 'sendFilaOpenMRS',
+                 error = paste0("Erro ao enviar fila do paciente: nid",df.patient[1], " - uuid:",df.patient[4] ))
+    save(logErro,file = 'logs\\logErro.RData')
+    print(as.character(r$error$message))
+    return(FALSE)
+  }
+  
+}
