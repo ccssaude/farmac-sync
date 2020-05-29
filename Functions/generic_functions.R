@@ -55,13 +55,13 @@ getFarmacServerCon <- function(){
       saveLogError(us.name = farmac_name,
                    event.date = as.character(Sys.time()),
                    action = ' getFarmacServerCon -> Estabelece uma conexao com o servidor central - Farmac',
-                   error =as.character(cond$message) ) 
+                   error =as.character(cond$message[1]) ) 
     } else {
       
       saveLogError(us.name = main_clinic_name,
                    event.date = as.character(Sys.time()),
                    action = ' getFarmacServerCon -> Estabelece uma conexao com o servidor central - Farmac',
-                   error =as.character(cond$message) ) 
+                   error =as.character(cond$message[1]) ) 
     }
     
     
@@ -167,10 +167,11 @@ getLocalServerCon <- function(){
 #' saveLogError(us_name,data,action ,erro )
 #' 
 saveLogError <- function (us.name, event.date, action, error){
-  
+
   # insere a linha de erro no log
   logErro  <<-  add_row(logErro,us = us.name, data_evento =event.date, accao =action, erro= error)
-  
+
+
 }
 
 
@@ -1940,3 +1941,5 @@ sendFilaOpenMRS <- function(jdbc.properties,df.patient, df.fila.info) {
   }
   
 }
+
+

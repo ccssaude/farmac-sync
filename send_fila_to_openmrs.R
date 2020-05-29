@@ -4,15 +4,15 @@ library(RMySQL)
 
 rm(list=setdiff(ls(), c("wd", "is.farmac") ))
 
-source('C:\\farmac-sync\\config\\config_properties.R') 
+source('C:\\farmac-sync\\config\\config_properties_api.R') 
 
 #####################################################################################################
 # default file='config\\jdbc.properties'
 jdbc_properties = readJdbcProperties()
 openmrs.user ='esaude'                           # ******** modificar
 openmrs.password='esaude'                        # ******** modificar
-openmrs.db.name='albazine'                       # ******** modificar
-openmrs.host='172.18.0.2'                        # ******** modificar
+openmrs.db.name='openmrs'                       # ******** modificar
+openmrs.host='192.168.0.101'                        # ******** modificar
 openmrs.port=3306                                # ******** modificar
 
 # Objecto de connexao com a bd openmrs
@@ -116,10 +116,11 @@ if(!is.logical(con_openmrs)){
               
               print(paste0(" Fila do paciente inserido no openmrs: ", nid, " - ",patient[2], " ", patient[3] ))
               dbSendQuery(con_local, paste0("update sync_temp_dispense set openmrs_status = 'yes' 
-                                          where dispensedate::date ='",as.Date(packagedruginfotmp_to_save$dispensedate),
+                                          where dispensedate::date ='",as.Date(substr(as.character(packagedruginfotmp_to_save$dispensedate),1,10)),
                                             "' and patientid ='",
                                             nid, "' ;"
               ))
+              
               
               
             } else {

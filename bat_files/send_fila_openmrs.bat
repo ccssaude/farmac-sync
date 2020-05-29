@@ -1,0 +1,1 @@
+R --no-save < "C:\farmac-sync\send_fila_to_openmrs.R"

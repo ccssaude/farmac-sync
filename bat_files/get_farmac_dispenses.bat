@@ -1,0 +1,1 @@
+R --no-save < "C:\farmac-sync\get_dispenses.R"

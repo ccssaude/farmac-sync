@@ -198,35 +198,6 @@ refferPatients <- function(con.farmac, reffered.patients) {
 }
 
 
-#' 
-#' @param us.name nome US
-#' @param data.evento data em que o erro acontece
-#' @param accao o que estava a tentar-se executar
-#' @param erro msg de erro  
-#' @return NA
-#' @examples 
-#' 
-#' us_name <- 'CS Albazine'
-#' data <- Sys.Date()
-#' action  <- 'get Farmac Patients
-#' erro <- 'Can not connect to server + excption.msg '
-#' saveLogError(us_name,data,action ,erro )
-#' 
-saveLogError <- function (us.name, event.date, action, error){
-  
-  # insere a linha de erro no log
-  logErro  <<-  add_row(logErro,us = us.name, data_evento =event.date, accao =action, Erro= error)
-  
-}
-
-
-
-
-
-
-
-
-
 #' receberPacienteServer -> carrega pacientes referidos para farmac
 #'
 #' @param con.postgres  obejcto de conexao com BD iDART

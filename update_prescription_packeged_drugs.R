@@ -5,7 +5,7 @@ library(lubridate)
 rm(list=setdiff(ls(), c("wd", "is.farmac") ))
 
 
-source('C:\\farmac-sync\\config\\config_properties.R')  
+source('C:\\farmac-sync\\config\\config_properties_api.R')  
 
 #####################################################################################################
 
@@ -153,11 +153,19 @@ if(!is.logical(con_local)){
                         ## actualizar sync_temp dispense
                         dbSendQuery(con_local,paste0( "update sync_temp_dispense set send_openmrs = 'yes' where id = ",all_patient_dispenses[j,]$id[1], " ;" ) )
                         
-                        dispense_date <- as.Date(packagedruginfotmp_to_save[1,]$dispensedate[1])
+                        dispense_date <-  as.Date(substr(as.character(packagedruginfotmp_to_save[1,]$dispensedate[1]),1,10))
+                        
+                        #dispense_date <- as.Date( packagedruginfotmp_to_save[1,]$dispensedate[1])
+                        
+                        
                         
                         vec_id <- dispenses_to_send_openmrs$id[ 
-                          which( as.Date(dispenses_to_send_openmrs$dispensedate) == dispense_date &
+                          which( as.Date(substr(as.character(dispenses_to_send_openmrs$dispensedate),1,10)) == dispense_date &
                                    dispenses_to_send_openmrs$patientid==nid )]
+                        
+                        # vec_id <- dispenses_to_send_openmrs$id[ 
+                        #   which( as.Date(dispenses_to_send_openmrs$dispensedate) == dispense_date &
+                        #            dispenses_to_send_openmrs$patientid==nid )]
                         
                         if(length(vec_id)>1){
                           
@@ -259,6 +267,7 @@ if(!is.logical(con_local)){
         # elimina transicoes de DT se existirem
         if(length(index_dt_date)>0){
           
+          
           dt_date <- patient_dispenses$dispensedate[index_dt_date[1]]
           dt_date <- as.Date(dt_date)
           next_dt_date <- dt_date %m+% months(3)
@@ -267,7 +276,10 @@ if(!is.logical(con_local)){
           ## actualizar sync_temp dispense
           for (t in 1:nrow(df_transicoes_dt)) {
             
-            dispense_date <- as.Date(df_transicoes_dt$dispensedate[t])
+            #dispense_date <- as.Date(df_transicoes_dt$dispensedate[t])
+            
+            
+            dispense_date <- as.Date(substr(as.character(df_transicoes_dt$dispensedate[t]),1,10))
             
             vec_id <- df_transicoes_dt$id[ 
               which( as.Date(df_transicoes_dt$dispensedate) == dispense_date )]
@@ -302,12 +314,18 @@ if(!is.logical(con_local)){
           
         }
         
-        vec_dates  <- sort( unique(as.Date(patient_dispenses$dispensedate)) )
+        
+        
+        
+        
+        #vec_dates  <- sort( unique(as.Date(patient_dispenses$dispensedate)) )
+        vec_dates  <- sort( unique( as.Date(substr(as.character(patient_dispenses$dispensedate),1,10) ) ) )
+       
         ################################################################################
         for (v in 1:length(vec_dates)) {
           
           # Processa as dispensas de cada data
-          patient_dispense <- patient_dispenses[which(as.Date(patient_dispenses$dispensedate)==vec_dates[v]), ]
+          patient_dispense <- patient_dispenses[which(as.Date(substr(as.character(patient_dispenses$dispensedate),1,10) ) ==vec_dates[v]), ]
           
           
           
@@ -409,11 +427,15 @@ if(!is.logical(con_local)){
                           ## actualizar sync_temp dispense
                           for (t in 1:nrow(packagedruginfotmp_to_save)) {
                             
-                            dispense_date <- as.Date(packagedruginfotmp_to_save$dispensedate[t])
+                            #dispense_date <- as.Date(packagedruginfotmp_to_save$dispensedate[t])
+                            dispense_date <- as.Date(substr(as.character(packagedruginfotmp_to_save$dispensedate[t]),1,10) )
                             
+                            
+                            
+                           
                             
                             vec_id <- dispenses_to_send_openmrs$id[ 
-                              which( as.Date(dispenses_to_send_openmrs$dispensedate) == dispense_date &
+                              which(  as.Date(substr(as.character(dispenses_to_send_openmrs$dispensedate),1,10) ) == dispense_date &
                                        dispenses_to_send_openmrs$patientid==nid )]
                             
                             # vec_id <- patient_dispense$id[ 

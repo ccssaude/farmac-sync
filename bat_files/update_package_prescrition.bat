@@ -1,0 +1,1 @@
+R --no-save < "C:\farmac-sync\update_prescription_packeged_drugs.R"
