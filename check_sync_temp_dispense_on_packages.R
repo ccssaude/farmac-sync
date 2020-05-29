@@ -24,7 +24,7 @@ all_packages <-  dbGetQuery(  con_local , 'select dispensedate, patientid from p
 dispenses_to_fix  <-  dispenses_to_send_openmrs %>% arrange(patientid,desc(pickupdate)) 
 # dispenses_to_fix <- distinct(dispenses_to_fix,as.Date(dispensedate), drugname, patientid , .keep_all = TRUE )
 # dispenses_to_fix$'as.Date(dispensedate)' <- NULL
-dispenses_to_fix$dispensedate <- as.Date(dispenses_to_fix$dispensedate)
+dispenses_to_fix$dispensedate <- as.Date(substr(as.character(dispenses_to_fix$dispensedate), 1,10) )
 
 all_patient_nids <- unique(dispenses_to_fix$patientid)
 
@@ -32,7 +32,7 @@ for (v in 1:length(all_patient_nids)) {
   
   nid = all_patient_nids[v]
   packages <- all_packages[which(all_packages$patientid == nid), ]
-  packages$dispensedate <- as.Date(packages$dispensedate)
+  packages$dispensedate <-  as.Date( substr(as.character(packages$dispensedate), 1,10) )
   
   dates_to_fix <- sort (dispenses_to_fix$dispensedate[which(dispenses_to_fix$patientid==nid)], decreasing = TRUE)
   
