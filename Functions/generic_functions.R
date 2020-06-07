@@ -1850,7 +1850,7 @@ checkPatientUuidExistsOpenMRS <- function(jdbc.properties, patient) {
   base.url.rest <- as.character(jdbc.properties$urlBaseReportingRest)
   base.url <-  as.character(jdbc.properties$urlBase)
   status <- TRUE
-  url.check.patient <- paste0(base.url,'person/',patient[4])
+  url.check.patient <- paste0(base.url,'patient?q=',patient[1])
   
   r <- content(GET(url.check.patient, authenticate('farmac', 'iD@rt2020!')), as = "parsed")
   
