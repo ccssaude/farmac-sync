@@ -274,40 +274,43 @@ if(!is.logical(con_local)){
           
           df_transicoes_dt <- subset(patient_dispenses,  as.Date(dispensedate) > dt_date &  as.Date(dispensedate) < next_dt_date ,)
           ## actualizar sync_temp dispense
-          for (t in 1:nrow(df_transicoes_dt)) {
-            
-            #dispense_date <- as.Date(df_transicoes_dt$dispensedate[t])
-            
-            
-            dispense_date <- as.Date(substr(as.character(df_transicoes_dt$dispensedate[t]),1,10))
-            
-            vec_id <- df_transicoes_dt$id[ 
-              which( as.Date(df_transicoes_dt$dispensedate) == dispense_date )]
-            
-            if(length(vec_id)>1){
+          if(nrow(df_transicoes_dt)>0){
+            for (t in 1:nrow(df_transicoes_dt)) {
               
-              for (k in 1:length(vec_id)) {
+              #dispense_date <- as.Date(df_transicoes_dt$dispensedate[t])
+              
+              
+              dispense_date <- as.Date(substr(as.character(df_transicoes_dt$dispensedate[t]),1,10))
+              
+              vec_id <- df_transicoes_dt$id[ 
+                which( as.Date(df_transicoes_dt$dispensedate) == dispense_date )]
+              
+              if(length(vec_id)>1){
                 
-                id <- vec_id[k]
-                sql_query <- paste0( "update sync_temp_dispense set imported = 'yes'  where id = ",id, " ;" )
+                for (k in 1:length(vec_id)) {
+                  
+                  id <- vec_id[k]
+                  sql_query <- paste0( "update sync_temp_dispense set imported = 'yes'  where id = ",id, " ;" )
+                  sql_query_delete_transporte <- paste0( "delete from  sync_temp_dispense where id = ",id, " ;" )
+                  print(sql_query)
+                  dbSendQuery(con_local,sql_query )
+                  dbSendQuery(con_local,sql_query_delete_transporte )
+                }
+                
+                
+              } else {
                 sql_query_delete_transporte <- paste0( "delete from  sync_temp_dispense where id = ",id, " ;" )
+                sql_query <- paste0( "update sync_temp_dispense set imported = 'yes' where id = ",vec_id[1], " ;" )
                 print(sql_query)
                 dbSendQuery(con_local,sql_query )
                 dbSendQuery(con_local,sql_query_delete_transporte )
+                
               }
               
               
-            } else {
-              sql_query_delete_transporte <- paste0( "delete from  sync_temp_dispense where id = ",id, " ;" )
-              sql_query <- paste0( "update sync_temp_dispense set imported = 'yes' where id = ",vec_id[1], " ;" )
-              print(sql_query)
-              dbSendQuery(con_local,sql_query )
-              dbSendQuery(con_local,sql_query_delete_transporte )
-              
             }
-            
-            
           }
+          
           
           patient_dispenses <- subset(patient_dispenses, ! as.Date(dispensedate) > dt_date &  as.Date(dispensedate) < next_dt_date ,)
           
@@ -320,7 +323,7 @@ if(!is.logical(con_local)){
         
         #vec_dates  <- sort( unique(as.Date(patient_dispenses$dispensedate)) )
         vec_dates  <- sort( unique( as.Date(substr(as.character(patient_dispenses$dispensedate),1,10) ) ) )
-       
+        
         ################################################################################
         for (v in 1:length(vec_dates)) {
           
@@ -432,11 +435,11 @@ if(!is.logical(con_local)){
                             
                             
                             
-                           
+                            
                             
                             vec_id <- dispenses_to_send_openmrs$id[ 
                               which(  as.Date(substr(as.character(dispenses_to_send_openmrs$dispensedate),1,10) ) == dispense_date &
-                                       dispenses_to_send_openmrs$patientid==nid )]
+                                        dispenses_to_send_openmrs$patientid==nid )]
                             
                             # vec_id <- patient_dispense$id[ 
                             #   which( as.Date(patient_dispense$dispensedate) ==dispense_date )]
