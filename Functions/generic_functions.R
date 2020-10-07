@@ -1741,7 +1741,7 @@ composePackageDrugInfoTmpOpenMRS <- function(df.patient.dispenses, user.id, regi
       qty = as.integer(substr(df.patient.dispenses$summaryqtyinhand,2,4))
     } else{
       
-      qty = as.integer(substr(df.patient.dispenses$summaryqtyinhand,2,3))
+      qty = as.integer(substr(df.patient.dispenses$summaryqtyinhand,2,2))
     }
     nr_toma <- 1
     if(as.integer(qty)>30){
